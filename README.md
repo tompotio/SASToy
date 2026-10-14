@@ -1,4 +1,4 @@
-# SASToy - Outil SAST personnel en Python
+# SASToy - Outil SAST jouet
 
 Petit projet de Static Application Security Testing (SAST) conçu pour apprendre les concepts de sécurité logicielle, analyser les Abstract Syntax Trees (AST).
 
