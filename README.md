@@ -53,6 +53,7 @@ Pour exécuter le scanner de manière identique sur n'importe quelle machine (Ma
    ```
 
 2. **Exécuter le scanner :**
+
    2.1 **Version classique**
    ```bash
       docker run --rm -v $(pwd):/app sastoy /app/tests/votre_fichier.py
