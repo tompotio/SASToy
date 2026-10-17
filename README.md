@@ -15,7 +15,7 @@ Petit projet de Static Application Security Testing (SAST) conçu pour apprendre
 
 ## Configuration du développement local (avec venv)
 
-Si vous souhaitez coder ou tester le projet directement dans votre IDE :
+Pour coder ou tester le projet directement dans l'IDE :
 
 1. **Créer l'environnement virtuel :**
    ```bash
