@@ -56,10 +56,11 @@ Pour exécuter le scanner de manière identique sur n'importe quelle machine (Ma
 
    2.1 **Version classique**
    ```bash
-      docker run --rm -v $(pwd):/app sastoy /app/tests/votre_fichier.py
+      docker run --rm -v $(pwd):/app sastoy /app/vulnerability/sample_1.py
    ```
 
    2.2 **Version alternative (à adapter en fonction de la version windows) :**
+
    Construction préalable :
    ```bash
       docker build -t sastoy-windows .
