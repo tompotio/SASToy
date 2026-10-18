@@ -15,7 +15,7 @@ Petit projet de Static Application Security Testing (SAST) conçu pour apprendre
 
 ## Configuration du développement local (avec venv)
 
-Si vous souhaitez coder ou tester le projet directement dans votre IDE :
+Pour coder ou tester le projet directement dans l'IDE :
 
 1. **Créer l'environnement virtuel :**
    ```bash
@@ -53,7 +53,22 @@ Pour exécuter le scanner de manière identique sur n'importe quelle machine (Ma
    ```
 
 2. **Exécuter le scanner :**
+
+   2.1 **Version classique**
    ```bash
-   docker run --rm -v $(pwd):/app sastoy /app/tests/votre_fichier.py
+      docker run --rm -v $(pwd):/app sastoy /app/vulnerability/sample_1.py
    ```
-   *(Note sous Windows PowerShell : si `$(pwd)` génère une erreur, remplacer par `${PWD}`)*
+
+   2.2 **Version alternative (à adapter en fonction de la version windows) :**
+
+   Construction préalable :
+   ```bash
+      docker build -t sastoy-windows .
+   ```
+
+   Lancement du docker :
+   ```bash
+      docker run --rm --isolation=process -v ${PWD}:C:\app sastoy-windows C:\app\tests\vulnerability\sample_1.py
+   ```
+
+*(Note sous Windows PowerShell : si `$(pwd)` génère une erreur, remplacer par `${PWD}`)

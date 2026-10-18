@@ -1,0 +1,7 @@
+# Pour automatiser les tests unitaires des règles de sécurité
+pytest>=8.0.0
+
+# Pour un l'affichage terminal, coloré et des rapports structurés
+rich>=13.0.0
+
+# La bibliothèque standard de Python contient déjà : ast, sys, os et json
