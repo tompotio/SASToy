@@ -1,6 +1,6 @@
 # SASToy - Outil SAST jouet
 
-Petit projet de Static Application Security Testing (SAST) conçu pour apprendre les concepts de sécurité logicielle, analyser les Abstract Syntax Trees (AST).
+Petit projet de Static Application Security Testing (SAST) conçu pour apprendre les concepts de sécurité logicielle. Et l'utilisation d'un Abstract Syntax Trees (AST).
 
 ---
 
