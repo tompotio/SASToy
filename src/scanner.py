@@ -31,6 +31,17 @@ def get_python_files(target_path, recursive=False):
   return []
 
 
+def parse_python_file(file):
+  try: 
+    with open(file, "r", encoding="utf-8") as f:
+      source_code = f.read()
+      tree = ast.parse(source_code)
+      return tree
+  except Exception as e:
+    print(f"[!] Erreur lors de l'analyse du fichier {file}: {e}")
+    return None
+
+  
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(
       description="Mini analyseur statique de code source basé sur l'AST."
@@ -45,7 +56,7 @@ if __name__ == "__main__":
   parser.add_argument(
       "-r",
       "--recursive",
-      action="store_true",  # Devient True si l'option est passée dans la commande
+      action="store_true",
       help="Analyser les sous-dossiers de manière récursive",
   )
 
@@ -53,3 +64,10 @@ if __name__ == "__main__":
   files_to_scan = get_python_files(args.target, recursive=args.recursive)
 
   print(f"[*] Fichiers identifiés pour l'analyse : {files_to_scan}")
+
+  for file in files_to_scan:
+    tree = parse_python_file(file)
+    if tree is not None:
+      print(ast.dump(tree, indent=4))
+    else:
+      print(f"[!] Échec de l'analyse pour le fichier : {file}")
