@@ -1,0 +1,9 @@
+{
+  "UNSAFE_EVAL": {
+    "cwe_id": "CWE-94",
+    "cwe_name": "Improper Control of Generation of Code ('Code Injection')",
+    "severity": "CRITICAL",
+    "description": "L'utilisation d'eval() permet l'exécution de code arbitraire.",
+    "historical_cve": "CVE-2017-5946"
+  }
+}

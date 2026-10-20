@@ -2,8 +2,53 @@ import argparse
 import ast
 import sys
 import os
+import json
 
 from pathlib import Path
+
+# Chargement dynamique des règles de sécurité
+rules_path = Path(__file__).resolve().with_name("rules_function_calls.json")
+with open(rules_path, "r", encoding="utf-8") as f:
+  SECURITY_FUNCTION_CALLS_RULES = json.load(f)
+
+
+class FunctionCallVisitor(ast.NodeVisitor):
+  """ Node Visitor pour détecter les appels de fonctions potentiellement dangereux dans le code source. """
+
+  def __init__(self, filepath):
+    self.filepath = filepath
+    self.findings = []
+
+    self.dangerous_functions = {
+        "eval": "UNSAFE_EVAL",
+        "exec": "UNSAFE_EXEC",
+        # ...
+    }
+
+  def visit_Call(self, node):
+    if isinstance(node.func, ast.Name):
+      func_name = node.func.id
+
+      if func_name in self.dangerous_functions:
+        rule_key = self.dangerous_functions[func_name]
+
+        self.findings.append({
+            "file":     self.filepath,
+            "line":     node.lineno,
+            "rule_key": rule_key,
+        })
+
+    self.generic_visit(node)
+
+
+class HardcodedSecretVisitor(ast.NodeVisitor):
+  """ Node Visitor pour détecter les secrets codés (ex mdp) en dur dans le code source. """
+
+
+class SqlInjectionVisitor(ast.NodeVisitor):
+  """ Node Visitor pour détecter les vulnérabilités d'injection SQL dans le code source. """
+
+
 
 def get_python_files(target_path, recursive=False):
   # Case 1: Check if the user provided a single file path
@@ -68,6 +113,19 @@ if __name__ == "__main__":
   for file in files_to_scan:
     tree = parse_python_file(file)
     if tree is not None:
-      print(ast.dump(tree, indent=4))
+      #print(ast.dump(tree, indent=4))
+
+      # Analyse des appels de fonctions potentiellement dangereux
+      function_call_visitor = FunctionCallVisitor(file)
+      function_call_visitor.visit(tree)
+
+      # Affiche les résultats de l'analyse
+      if function_call_visitor.findings:
+        print(f"[!] Vulnérabilités détectées dans le fichier : {file}")
+        for finding in function_call_visitor.findings:
+          print(
+              f"  - Ligne {finding['line']}: {finding['rule_key']} (Appel de fonction potentiellement dangereux)"
+          )
+
     else:
       print(f"[!] Échec de l'analyse pour le fichier : {file}")
