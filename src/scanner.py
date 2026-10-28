@@ -49,7 +49,6 @@ class SqlInjectionVisitor(ast.NodeVisitor):
   """ Node Visitor pour détecter les vulnérabilités d'injection SQL dans le code source. """
 
 
-
 def get_python_files(target_path, recursive=False):
   # Case 1: Check if the user provided a single file path
   if os.path.isfile(target_path) and target_path.endswith(".py"):
