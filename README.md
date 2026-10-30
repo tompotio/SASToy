@@ -1,15 +1,21 @@
 # SASToy - Outil SAST jouet
 
-Petit projet de Static Application Security Testing (SAST) conçu pour apprendre les concepts de sécurité logicielle. Et l'utilisation d'un Abstract Syntax Trees (AST).
+Petit projet de Static Application Security Testing (SAST) conçu pour apprendre les concepts de sécurité logicielle.
 
 ---
 
 ## Structure du projet
 
 - `src/` : Contient le code source de notre moteur de scan SAST.
-- `tests/` : Héberge les fichiers de test et les échantillons de code intentionnellement vulnérables.
+- `tests/` : Regroupe les tests unitaires, les échantillons vulnérables par catégorie et langage, et les fixtures.
 - `Dockerfile` : Configuration pour exécuter l'outil dans un conteneur Docker indépendant du système d'exploitation.
 - `requirements.txt` : Liste des dépendances Python du projet avec leurs versions exactes.
+
+Le code source sépare l'interface en ligne de commande (`src/interface.py`),
+l'orchestration (`src/main.py`), les utilitaires (`src/utils.py`) et la
+vérification d'intégrité (`src/integrity.py`). Les analyses de vulnérabilités
+reposent sur le contrat `VulnerabilityAnalyzer` dans `src/analyzers/base.py`,
+implémenté pour Python dans `src/analyzers/python.py`.
 
 ---
 
@@ -56,7 +62,7 @@ Pour exécuter le scanner de manière identique sur n'importe quelle machine (Ma
 
    2.1 **Version classique**
    ```bash
-      docker run --rm -v $(pwd):/app sastoy /app/vulnerability/sample_1.py
+      docker run --rm -v $(pwd):/app sastoy py /app/tests/vulnerabilities/unsafe_eval/python/sample.py
    ```
 
    2.2 **Version alternative (à adapter en fonction de la version windows) :**
@@ -68,10 +74,24 @@ Pour exécuter le scanner de manière identique sur n'importe quelle machine (Ma
 
    Lancement du docker :
    ```bash
-      docker run --rm --isolation=process -v ${PWD}:C:\app sastoy-windows C:\app\tests\vulnerability\sample_1.py
+      docker run --rm --isolation=process -v ${PWD}:C:\app sastoy-windows py C:\app\tests\vulnerabilities\unsafe_eval\python\sample.py
    ```
 
 *(Note sous Windows PowerShell : si `$(pwd)` génère une erreur, remplacer par `${PWD}`)
+
+## Organisation des tests
+
+Les tests unitaires sont dans `tests/unit/`. Les tests ciblant une vulnérabilité
+et leurs échantillons sont regroupés sous
+`tests/vulnerabilities/<categorie>/<langage>/` (par exemple
+`tests/vulnerabilities/hardcoded_secrets/python/`). Les données de test
+génériques sont stockées dans `tests/fixtures/`.
+
+Lancer tous les tests :
+
+```powershell
+python -m pytest
+```
 
 ## Vérification d'un haché
 
@@ -95,13 +115,22 @@ python src/scanner.py exe chemin\vers\fichier.exe --algorithm sha256 --web-searc
 
 La recherche web demande à Gemini d'identifier une source officielle et
 n'accepte un haché que si la réponse fournit explicitement le marqueur
-`OFFICIAL_CHECKSUM`. Vérifiez les sources affichées avant de vous fier au
-résultat. Les comparaisons MD5 et SHA-1 sont disponibles pour compatibilité,
-mais ces algorithmes ne sont pas recommandés lorsque la résistance aux
-collisions est nécessaire.
+`OFFICIAL_CHECKSUM`. Les comparaisons MD5 et SHA-1 sont disponibles.
 
 Afficher les commandes et options à tout moment :
 
 ```powershell
 python src/scanner.py --help
 ```
+
+## Documentation
+
+La documentation du projet est rédigée avec Sphinx dans `docs/`. Pour générer
+le site HTML localement :
+
+```powershell
+python -m sphinx -b html docs docs/_build/html
+```
+
+Ouvrez ensuite `docs/_build/html/index.html`. Les fichiers générés dans
+`docs/_build/` sont ignorés par Git.

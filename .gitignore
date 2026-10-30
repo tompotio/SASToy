@@ -10,6 +10,9 @@ __pycache__/
 *$py.class
 *.pyc
 
+# Documentation HTML générée localement par Sphinx
+docs/_build/
+
 # Fichiers IDE et système
 .vscode/
 .idea/
@@ -18,3 +21,12 @@ Thumbs.db
 
 # Tests exe
 *.exe
+docs/api/src.analyzers.base.html
+docs/api/src.analyzers.html
+docs/api/src.analyzers.python.html
+docs/api/src.html
+docs/api/src.integrity.html
+docs/api/src.interface.html
+docs/api/src.main.html
+docs/api/src.scanner.html
+docs/api/src.utils.html

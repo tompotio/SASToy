@@ -42,6 +42,11 @@ def test_validate_hash_rejects_wrong_length():
         validate_hash("abcd", "md5")
 
 
+def test_validate_hash_rejects_unsupported_algorithm():
+    with pytest.raises(ValueError, match="non pris en charge"):
+        validate_hash("abcd", "sha512")
+
+
 def test_extract_official_checksum_requires_explicit_checksum():
     checksum = "a9993e364706816aba3e25717850c26c9cd0d89d"
 
@@ -56,6 +61,18 @@ def test_extract_official_checksum_requires_explicit_checksum():
     with pytest.raises(ValueError, match="Un seul haché officiel"):
         extract_official_checksum(
             f"OFFICIAL_CHECKSUM: {checksum}\nOFFICIAL_CHECKSUM: {checksum}",
+            "sha1",
+        )
+
+
+def test_extract_official_checksum_rejects_multiple_different_checksums():
+    checksum = "a9993e364706816aba3e25717850c26c9cd0d89d"
+    other_checksum = "b9993e364706816aba3e25717850c26c9cd0d89d"
+
+    with pytest.raises(ValueError, match="Un seul haché officiel"):
+        extract_official_checksum(
+            f"OFFICIAL_CHECKSUM: {checksum}\n"
+            f"OFFICIAL_CHECKSUM: {other_checksum}",
             "sha1",
         )
 

@@ -1,4 +1,4 @@
-# tests/sample_1.py
+# Example of unsafe dynamic evaluation.
 
 def calculate():
   user_input = input("Input to evaluate : ")
