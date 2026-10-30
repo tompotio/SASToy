@@ -2,6 +2,7 @@
 venv/
 env/
 ENV/
+.venv/
 
 # Cache Python
 __pycache__/
@@ -14,3 +15,6 @@ __pycache__/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Tests lourds
+ChromeSetup.exe

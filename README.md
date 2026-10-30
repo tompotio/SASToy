@@ -72,3 +72,36 @@ Pour exécuter le scanner de manière identique sur n'importe quelle machine (Ma
    ```
 
 *(Note sous Windows PowerShell : si `$(pwd)` génère une erreur, remplacer par `${PWD}`)
+
+## Vérification d'un haché
+
+Le mode `hash` calcule le haché d'un fichier et le compare à une valeur de
+référence. Les algorithmes pris en charge sont MD5, SHA-1 et SHA-256. Sans
+option de référence, SASToy demande interactivement l'algorithme et la source
+du haché.
+
+Comparer avec un haché fourni :
+
+```powershell
+python src/scanner.py hash chemin\vers\fichier.exe --algorithm sha1 --official-hash <haché>
+```
+
+Rechercher le haché officiel sur le web (nécessite une clé Gemini dans
+`GEMINI_API_KEY`) :
+
+```powershell
+python src/scanner.py exe chemin\vers\fichier.exe --algorithm sha256 --web-search
+```
+
+La recherche web demande à Gemini d'identifier une source officielle et
+n'accepte un haché que si la réponse fournit explicitement le marqueur
+`OFFICIAL_CHECKSUM`. Vérifiez les sources affichées avant de vous fier au
+résultat. Les comparaisons MD5 et SHA-1 sont disponibles pour compatibilité,
+mais ces algorithmes ne sont pas recommandés lorsque la résistance aux
+collisions est nécessaire.
+
+Afficher les commandes et options à tout moment :
+
+```powershell
+python src/scanner.py --help
+```
