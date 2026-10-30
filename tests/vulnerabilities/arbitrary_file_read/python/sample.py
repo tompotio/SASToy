@@ -7,7 +7,7 @@ def lire_document():
     if len(sys.argv) > 1:
         fichier = sys.argv[1]
     else:
-        fichier = "sample_2.py"
+        fichier = "sample.py"
 
     repertoire_courant = os.getcwd()
     fichier_cible = os.path.join(repertoire_courant, fichier)
