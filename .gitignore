@@ -16,5 +16,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Tests lourds
-ChromeSetup.exe
+# Tests exe
+*.exe
