@@ -51,7 +51,11 @@ Pour coder ou tester le projet directement dans l'IDE :
 
 ## Utilisation avec Docker
 
-Pour exécuter le scanner de manière identique sur n'importe quelle machine (Mac, Linux, Windows) :
+Le Dockerfile utilise l'image `python:3.11-windowsservercore`. Il nécessite
+Docker en mode conteneurs Windows ; il n'est pas compatible avec un moteur
+Docker configuré pour les conteneurs Linux.
+
+Dans PowerShell, depuis la racine du dépôt :
 
 1. **Construire l'image Docker :**
    ```bash
@@ -59,25 +63,9 @@ Pour exécuter le scanner de manière identique sur n'importe quelle machine (Ma
    ```
 
 2. **Exécuter le scanner :**
-
-   2.1 **Version classique**
    ```bash
-      docker run --rm -v $(pwd):/app sastoy py /app/tests/vulnerabilities/unsafe_eval/python/sample.py
+   docker run --rm --isolation=process -v "${PWD}:C:\app" sastoy py C:\app\tests\vulnerabilities\unsafe_eval\python\sample.py
    ```
-
-   2.2 **Version alternative (à adapter en fonction de la version windows) :**
-
-   Construction préalable :
-   ```bash
-      docker build -t sastoy-windows .
-   ```
-
-   Lancement du docker :
-   ```bash
-      docker run --rm --isolation=process -v ${PWD}:C:\app sastoy-windows py C:\app\tests\vulnerabilities\unsafe_eval\python\sample.py
-   ```
-
-*(Note sous Windows PowerShell : si `$(pwd)` génère une erreur, remplacer par `${PWD}`)
 
 ## Organisation des tests
 

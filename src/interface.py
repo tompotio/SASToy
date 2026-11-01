@@ -14,10 +14,10 @@ def build_parser():
         ),
         epilog=(
             "Exemples :\n"
-            "  python src/scanner.py py fichier.py\n"
-            "  python src/scanner.py hash fichier.exe --algorithm md5 "
+            "  python src/main.py py fichier.py\n"
+            "  python src/main.py hash fichier.exe --algorithm md5 "
             "--official-hash <haché>\n"
-            "  python src/scanner.py exe fichier.exe --algorithm sha1 --web-search"
+            "  python src/main.py exe fichier.exe --algorithm sha1 --web-search"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
