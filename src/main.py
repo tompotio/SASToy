@@ -11,7 +11,6 @@ from src.analyzers.python import PythonAnalyzer
 from src.integrity import run_hash_verification
 from src.interface import ask_for_operations, build_parser, show_python_files
 
-
 def main(argv=None):
     """Run the selected SASToy command and return its process exit code."""
     console = Console()

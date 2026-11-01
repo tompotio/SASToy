@@ -16,11 +16,11 @@ dépendances :
 Analyser un fichier Python
 --------------------------
 
-Lancez l'interface historique, qui reste prise en charge :
+Lancez l'analyseur Python :
 
 .. code-block:: powershell
 
-   python src/scanner.py py tests/vulnerabilities/unsafe_eval/python/sample.py
+   python src/main.py py tests/vulnerabilities/unsafe_eval/python/sample.py
 
 Le scanner demande les opérations à exécuter. Exemple pour rechercher les
 appels dangereux :
@@ -36,14 +36,14 @@ Fournissez un checksum de référence avec l'algorithme voulu :
 
 .. code-block:: powershell
 
-   python src/scanner.py hash chemin\vers\fichier.exe --algorithm sha256 --official-hash <haché>
+   python src/main.py hash chemin\vers\fichier.exe --algorithm sha256 --official-hash <haché>
 
 La recherche automatique d'un checksum officiel nécessite une variable
 d'environnement ``GEMINI_API_KEY`` :
 
 .. code-block:: powershell
 
-   python src/scanner.py exe chemin\vers\fichier.exe --algorithm sha256 --web-search
+   python src/main.py exe chemin\vers\fichier.exe --algorithm sha256 --web-search
 
 Générer la documentation
 ------------------------

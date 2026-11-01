@@ -21,8 +21,6 @@ Le code est divisé par responsabilité :
      - Calcul et vérification des hachages, indépendamment des analyseurs de langage.
    * - ``src.utils``
      - Utilitaires de découverte de fichiers.
-   * - ``src.scanner``
-     - Point d'entrée historique et réexport de compatibilité.
 
 Ajouter un analyseur pour un langage doit consister à implémenter
 ``VulnerabilityAnalyzer`` avec les opérations prises en charge pour ce langage.

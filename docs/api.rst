@@ -1,20 +1,11 @@
 Référence API
 =============
 
-.. autosummary::
-   :toctree: generated
-   :recursive:
+Cette référence est générée directement depuis les docstrings des modules
+SASToy par l'extension autodoc de Sphinx.
 
-   src.analyzers.base
-   src.analyzers.python
-   src.integrity
-   src.interface
-   src.main
-   src.scanner
-   src.utils
-
-Modules détaillés
------------------
+Analyseurs
+----------
 
 .. automodule:: src.analyzers.base
    :members:
@@ -24,14 +15,23 @@ Modules détaillés
    :members:
    :show-inheritance:
 
+Vérification d'intégrité
+------------------------
+
 .. automodule:: src.integrity
    :members:
+
+Interface en ligne de commande
+------------------------------
 
 .. automodule:: src.interface
    :members:
 
 .. automodule:: src.main
    :members:
+
+Utilitaires
+-----------
 
 .. automodule:: src.utils
    :members:
