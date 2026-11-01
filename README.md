@@ -103,14 +103,14 @@ du haché.
 Comparer avec un haché fourni :
 
 ```powershell
-python src/scanner.py hash chemin\vers\fichier.exe --algorithm sha1 --official-hash <haché>
+python src/main.py hash chemin\vers\fichier.exe --algorithm sha1 --official-hash <haché>
 ```
 
 Rechercher le haché officiel sur le web (nécessite une clé Gemini dans
 `GEMINI_API_KEY`) :
 
 ```powershell
-python src/scanner.py exe chemin\vers\fichier.exe --algorithm sha256 --web-search
+python src/main.py exe chemin\vers\fichier.exe --algorithm sha256 --web-search
 ```
 
 La recherche web demande à Gemini d'identifier une source officielle et
@@ -120,7 +120,7 @@ n'accepte un haché que si la réponse fournit explicitement le marqueur
 Afficher les commandes et options à tout moment :
 
 ```powershell
-python src/scanner.py --help
+python src/main.py --help
 ```
 
 ## Documentation

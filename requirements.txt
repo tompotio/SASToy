@@ -12,5 +12,6 @@ detect_secrets
 
 # Génération de la documentation du projet
 sphinx>=7.0
+furo>=2024.8.6
 
 # La bibliothèque standard de Python contient déjà : ast, sys, os et json

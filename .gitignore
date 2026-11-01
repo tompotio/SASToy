@@ -1,32 +1,52 @@
-# Environnement virtuel
+# Environnements virtuels Python
+.venv/
 venv/
 env/
 ENV/
-.venv/
 
-# Cache Python
+# Secrets et configuration locale
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Cache et fichiers temporaires Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.pyc
+.Python
 
-# Documentation HTML générée localement par Sphinx
-docs/_build/
+# Tests, couverture et vérifications statiques
+.pytest_cache/
+.tox/
+.nox/
+.hypothesis/
+.mypy_cache/
+.pyre/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
 
-# Fichiers IDE et système
+# Paquets et artefacts de compilation Python
+build/
+dist/
+pip-wheel-metadata/
+*.egg-info/
+*.whl
+
+# Documentation générée localement (Sphinx)
+/docs/_build/
+/docs/build/
+
+# Fichiers locaux d'IDE
 .vscode/
 .idea/
+
+# Fichiers système
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# Tests exe
-*.exe
-docs/api/src.analyzers.base.html
-docs/api/src.analyzers.html
-docs/api/src.analyzers.python.html
-docs/api/src.html
-docs/api/src.integrity.html
-docs/api/src.interface.html
-docs/api/src.main.html
-docs/api/src.scanner.html
-docs/api/src.utils.html
+# Installateurs binaires volumineux utilisés comme fixtures locales
+/tests/fixtures/executables/*.exe
