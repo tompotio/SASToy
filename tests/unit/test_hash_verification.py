@@ -3,7 +3,7 @@ import io
 import pytest
 from rich.console import Console
 
-from src.scanner import (
+from src.integrity import (
     calculate_md5,
     calculate_sha1,
     calculate_sha256,
