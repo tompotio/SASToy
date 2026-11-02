@@ -10,9 +10,9 @@ from src.analyzers.base import VulnerabilityAnalyzer
 from src.utils import get_files_by_extension
 
 
-rules_path = Path(__file__).resolve().parents[1] / "rules_function_calls.json"
+rules_path = Path(__file__).resolve().parents[1] / "rules" / "python_security.json"
 with open(rules_path, "r", encoding="utf-8") as rules_file:
-    SECURITY_FUNCTION_CALLS_RULES = json.load(rules_file)
+    PYTHON_SECURITY_RULES = json.load(rules_file)
 
 
 class FunctionCallVisitor(ast.NodeVisitor):
@@ -46,7 +46,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
     def visit_Call(self, node):
         """Collect calls matching the syntax described by the rule catalog."""
         call_name = self._resolve_name(node.func)
-        for rule_key, rule in SECURITY_FUNCTION_CALLS_RULES.items():
+        for rule_key, rule in PYTHON_SECURITY_RULES.items():
             match = rule.get("match")
             if match and self._matches_rule(node, call_name, match):
                 self.findings.append(
@@ -148,7 +148,7 @@ class PythonAnalyzer(VulnerabilityAnalyzer):
             if visitor.findings:
                 print(f"[!] Signaux indicatifs détectés dans le fichier : {file}")
                 for finding in visitor.findings:
-                    rule = SECURITY_FUNCTION_CALLS_RULES[finding["rule_key"]]
+                    rule = PYTHON_SECURITY_RULES[finding["rule_key"]]
                     print(
                         f"  - Ligne {finding['line']}: "
                         f"{rule.get('title', finding['rule_key'])} "
