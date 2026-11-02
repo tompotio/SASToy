@@ -40,6 +40,39 @@ telles que Requests et urllib3. Ils sont documentaires : cette opération ne
 vérifie pas les versions installées ou déclarées. Il faut comparer les
 dépendances des fichiers de requirements ou de verrouillage aux avis concernés.
 
+Mode exhaustif (prototype)
+--------------------------
+
+Le mode exhaustif est un prototype d'interface et de rapport : ses sorties,
+comptages et recommandations sont fictifs et aucune stratégie n'analyse la
+cible. Il ne faut pas interpréter ses exemples comme des résultats de scan.
+Les stratégies sélectionnées par défaut sont celles actuellement implémentées
+(``security_signals`` et ``hcs``) ; CFI et SQLi sont indiquées comme non
+implémentées.
+
+Lancez le prototype et sélectionnez les stratégies dans l'invite :
+
+.. code-block:: powershell
+
+   python src/main.py py chemin\vers\projet --mode exhaustif
+
+Pour sélectionner les stratégies sans invite :
+
+.. code-block:: powershell
+
+   python src/main.py py chemin\vers\projet --mode exhaustif --strategies security_signals hcs
+
+Sans ``--mode``, SASToy demande de choisir entre le mode manuel (valeur par
+défaut) et le mode exhaustif. Dans le prototype exhaustif, un rapport HTML
+autonome est créé sous ``reports/`` dans le répertoire courant. Le chemin du
+rapport est affiché dans le terminal ; il n'est pas ouvert automatiquement.
+
+Le CLI demande si un token Gemini est configuré, puis, le cas échéant, un
+consentement distinct avant l'envoi d'un résumé anonymisé. Seuls les noms des
+stratégies et leurs nombres d'exemples fictifs sont transmis ; ni le code, ni
+les chemins de fichiers, ni les valeurs de secrets ne sont envoyés. La partie
+IA reste distincte des sorties locales dans le rapport.
+
 Vérifier l'intégrité d'un fichier
 ---------------------------------
 

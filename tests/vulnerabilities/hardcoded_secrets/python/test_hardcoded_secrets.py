@@ -22,6 +22,8 @@ def test_hcs_operation_reports_sample_through_cli():
             str(PROJECT_ROOT / "src" / "main.py"),
             "py",
             str(SAMPLE_FILE),
+            "--mode",
+            "manuel",
         ],
         input="hcs\n",
         capture_output=True,

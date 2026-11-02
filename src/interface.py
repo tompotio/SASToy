@@ -2,7 +2,10 @@ import argparse
 
 from rich.console import Console
 from rich.panel import Panel
-from rich.prompt import Prompt
+from rich.prompt import Confirm, Prompt
+
+
+IMPLEMENTED_STRATEGIES = ("security_signals", "hcs")
 
 
 def build_parser():
@@ -10,7 +13,7 @@ def build_parser():
     parser = argparse.ArgumentParser(
         description=(
             "SASToy - analyseur statique Python et outil de vérification "
-            "d'intégrité par haché."
+            "d'intégrité."
         ),
         epilog=(
             "Exemples :\n"
@@ -33,6 +36,20 @@ def build_parser():
         "target",
         type=str,
         help="Chemin du fichier ou du dossier à analyser",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["manuel", "exhaustif"],
+        help="Mode d'analyse (par défaut : choix interactif)",
+    )
+    parser.add_argument(
+        "--strategies",
+        nargs="+",
+        choices=IMPLEMENTED_STRATEGIES,
+        help=(
+            "Stratégies à inclure en mode exhaustif "
+            "(par défaut : toutes celles implémentées)"
+        ),
     )
     parser.add_argument(
         "-r",
@@ -79,3 +96,49 @@ def ask_for_operations():
         "[bold cyan]Opérations à effectuer[/] "
         "(security_signals, cfi, hcs, sqli ; séparées par des virgules)"
     ).split(",")
+
+
+def ask_for_mode():
+    """Prompt for the analysis mode."""
+    return Prompt.ask(
+        "[bold cyan]Mode d'analyse[/]",
+        choices=["manuel", "exhaustif"],
+        default="manuel",
+    )
+
+
+def ask_for_strategies():
+    """Prompt for the implemented strategies selected for a demo report."""
+    default = ",".join(IMPLEMENTED_STRATEGIES)
+    selected = Prompt.ask(
+        "[bold cyan]Stratégies (séparées par des virgules)[/]",
+        default=default,
+    )
+    strategies = [
+        strategy.strip()
+        for strategy in selected.split(",")
+        if strategy.strip()
+    ]
+    invalid = sorted(set(strategies) - set(IMPLEMENTED_STRATEGIES))
+    if invalid:
+        raise ValueError(
+            "Stratégie(s) non implémentée(s) ou inconnue(s) : "
+            + ", ".join(invalid)
+        )
+    return list(dict.fromkeys(strategies))
+
+
+def ask_for_ai_consent():
+    """Ask separately whether a Gemini token exists and whether to use Gemini."""
+    has_token = Confirm.ask(
+        "Disposez-vous d'un token Gemini configuré dans GEMINI_API_KEY ?",
+        default=False,
+    )
+    if not has_token:
+        return False
+
+    return Confirm.ask(
+        "Autorisez-vous Gemini à analyser un résumé anonymisé "
+        "pour cette analyse ?",
+        default=False,
+    )

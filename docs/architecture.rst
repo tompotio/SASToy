@@ -17,6 +17,8 @@ Le code est divisé par responsabilité :
      - Contrat abstrait commun aux analyseurs de vulnérabilités par langage.
    * - ``src.analyzers.python``
      - Sélection des fichiers Python, détection de signaux syntaxiques définis dans le catalogue et détection de secrets.
+   * - ``src.exhaustive`` et ``src.report``
+     - Adaptateurs de démonstration du mode exhaustif, conservation des erreurs et génération de rapports HTML autonomes à partir de données explicitement fictives.
    * - ``src.rules``
      - Catalogues de règles propres à chaque langage, notamment ``python_security.json`` pour l'analyseur Python.
    * - ``src.integrity``
@@ -31,6 +33,11 @@ Ses règles doivent résider dans un catalogue propre à ce langage sous
 catalogue Python.
 Les fonctions d'intégrité restent en dehors de cette hiérarchie, car elles ne
 dépendent pas de la syntaxe ou du langage analysé.
+
+Le mode exhaustif est actuellement un prototype : ses fonctions de stratégie
+fournissent des exemples statiques et ne lancent pas les analyseurs Python. Le
+contrat de sortie et toute agrégation restent à concevoir avec les stratégies
+réelles.
 
 L'analyse des appels Python est heuristique : elle repère des constructions
 syntaxiques indicatives sans démontrer qu'une vulnérabilité est exploitable.

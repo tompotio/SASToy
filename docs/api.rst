@@ -30,6 +30,15 @@ Interface en ligne de commande
 .. automodule:: src.main
    :members:
 
+Prototype exhaustif et rapports
+-------------------------------
+
+.. automodule:: src.exhaustive
+   :members:
+
+.. automodule:: src.report
+   :members:
+
 Utilitaires
 -----------
 
