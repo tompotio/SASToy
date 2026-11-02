@@ -36,14 +36,17 @@ Fournissez un checksum de référence avec l'algorithme voulu :
 
 .. code-block:: powershell
 
-   python src/main.py hash chemin\vers\fichier.exe --algorithm sha256 --official-hash <haché>
+   python src/main.py hash chemin\vers\fichier.bin --algorithm sha256 --official-hash <haché>
 
 La recherche automatique d'un checksum officiel nécessite une variable
 d'environnement ``GEMINI_API_KEY`` :
 
 .. code-block:: powershell
 
-   python src/main.py exe chemin\vers\fichier.exe --algorithm sha256 --web-search
+   python src/main.py binary chemin\vers\fichier.bin --algorithm sha256 --web-search
+
+Le mode ``binary`` accepte aussi l'alias ``bin``. L'ancien mode ``exe`` reste
+accepté comme alias de compatibilité.
 
 Générer la documentation
 ------------------------

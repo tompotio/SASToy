@@ -5,6 +5,12 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 
 
+def normalize_mode(value):
+    """Normalize binary-mode aliases while preserving the legacy ``exe`` mode."""
+    normalized = value.lower()
+    return "binary" if normalized in {"bin", "exe"} else normalized
+
+
 def build_parser():
     """Build the command-line parser and its supported options."""
     parser = argparse.ArgumentParser(
@@ -15,18 +21,18 @@ def build_parser():
         epilog=(
             "Exemples :\n"
             "  python src/main.py py fichier.py\n"
-            "  python src/main.py hash fichier.exe --algorithm md5 "
+            "  python src/main.py hash fichier.bin --algorithm md5 "
             "--official-hash <haché>\n"
-            "  python src/main.py exe fichier.exe --algorithm sha1 --web-search"
+            "  python src/main.py binary fichier.bin --algorithm sha1 --web-search"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "type",
-        type=str,
-        choices=["py", "exe", "hash"],
+        type=normalize_mode,
+        choices=["py", "binary", "hash"],
         help=(
-            "py (analyse AST), exe (haché d'un exécutable), "
+            "py (analyse AST), binary/bin (haché d'un binaire), "
             "hash (haché d'un fichier)"
         ),
     )

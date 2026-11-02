@@ -80,7 +80,7 @@ def extract_official_checksum(result, algorithm):
 
 
 def extract_metadata(file_path):
-    """Extract version information from a Windows executable."""
+    """Extract version information from a Windows PE binary."""
     metadata = {}
 
     try:
@@ -119,7 +119,7 @@ def search_official_checksum(metadata, filename, algorithm="sha256"):
   You are assisting with defensive software integrity verification.
 
   Filename: {filename}
-  Executable metadata: {metadata}
+  Binary metadata: {metadata}
 
   Search the web for the official publisher's release page or checksum
   manifest for this exact product and version.
@@ -209,7 +209,7 @@ def run_hash_verification(args, console):
         args.web_search = source == "web"
 
     if args.web_search:
-        metadata = extract_metadata(args.target) if args.type == "exe" else {}
+        metadata = extract_metadata(args.target) if args.type == "binary" else {}
         with console.status(
             "[bold cyan]Recherche du haché officiel sur le web...[/]",
             spinner="dots",

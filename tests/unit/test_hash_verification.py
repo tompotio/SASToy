@@ -11,6 +11,30 @@ from src.integrity import (
     validate_hash,
     verify_file_hash,
 )
+from src.interface import build_parser
+from src import main as main_module
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected"),
+    [
+        ("binary", "binary"),
+        ("bin", "binary"),
+        ("exe", "binary"),
+        ("hash", "hash"),
+    ],
+)
+def test_parser_normalizes_integrity_modes(mode, expected):
+    args = build_parser().parse_args([mode, "sample.bin"])
+
+    assert args.type == expected
+
+
+def test_main_runs_integrity_verification_for_binary_mode(monkeypatch):
+    monkeypatch.setattr(main_module.os.path, "isfile", lambda _target: True)
+    monkeypatch.setattr(main_module, "run_hash_verification", lambda *_args: True)
+
+    assert main_module.main(["binary", "sample.bin"]) == 0
 
 
 @pytest.mark.parametrize(

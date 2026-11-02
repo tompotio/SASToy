@@ -91,19 +91,21 @@ du haché.
 Comparer avec un haché fourni :
 
 ```powershell
-python src/main.py hash chemin\vers\fichier.exe --algorithm sha1 --official-hash <haché>
+python src/main.py hash chemin\vers\fichier.bin --algorithm sha1 --official-hash <haché>
 ```
 
 Rechercher le haché officiel sur le web (nécessite une clé Gemini dans
 `GEMINI_API_KEY`) :
 
 ```powershell
-python src/main.py exe chemin\vers\fichier.exe --algorithm sha256 --web-search
+python src/main.py binary chemin\vers\fichier.bin --algorithm sha256 --web-search
 ```
 
 La recherche web demande à Gemini d'identifier une source officielle et
 n'accepte un haché que si la réponse fournit explicitement le marqueur
 `OFFICIAL_CHECKSUM`. Les comparaisons MD5 et SHA-1 sont disponibles.
+Le mode `binary` accepte aussi l'alias `bin`. L'ancien mode `exe` reste accepté
+comme alias de compatibilité.
 
 Afficher les commandes et options à tout moment :
 
