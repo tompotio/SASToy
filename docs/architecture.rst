@@ -17,6 +17,8 @@ Le code est divisé par responsabilité :
      - Contrat abstrait commun aux analyseurs de vulnérabilités par langage.
    * - ``src.analyzers.python``
      - Sélection des fichiers Python, détection de signaux syntaxiques définis dans le catalogue et détection de secrets.
+   * - ``src.rules``
+     - Catalogues de règles propres à chaque langage, notamment ``python_security.json`` pour l'analyseur Python.
    * - ``src.integrity``
      - Calcul et vérification des hachages, indépendamment des analyseurs de langage.
    * - ``src.utils``
@@ -24,6 +26,9 @@ Le code est divisé par responsabilité :
 
 Ajouter un analyseur pour un langage doit consister à implémenter
 ``VulnerabilityAnalyzer`` avec les opérations prises en charge pour ce langage.
+Ses règles doivent résider dans un catalogue propre à ce langage sous
+``src/rules/`` ; les analyseurs d'autres langages ne réutilisent pas le
+catalogue Python.
 Les fonctions d'intégrité restent en dehors de cette hiérarchie, car elles ne
 dépendent pas de la syntaxe ou du langage analysé.
 
