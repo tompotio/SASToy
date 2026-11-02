@@ -1,15 +1,150 @@
 {
   "UNSAFE_EVAL": {
+    "title": "Exécution dynamique avec eval",
     "cwe_id": "CWE-94",
     "cwe_name": "Improper Control of Generation of Code ('Code Injection')",
-    "severity": "CRITICAL",
-    "description": "L'utilisation d'eval() permet l'exécution de code arbitraire.",
-    "historical_cve": "CVE-2017-5946"
+    "severity": "HIGH",
+    "signal_only": true,
+    "description": "eval() interprète une expression Python. Le risque dépend notamment de la provenance de l'expression et du contexte d'exécution.",
+    "historical_context": "Aucun CVE unique n'est associé à l'utilisation générique de eval() ; les avis de sécurité concernent des applications et des flux de données particuliers.",
+    "match": {
+      "calls": ["eval", "builtins.eval"]
+    }
   },
   "UNSAFE_EXEC": {
+    "title": "Exécution dynamique avec exec",
     "cwe_id": "CWE-94",
     "cwe_name": "Improper Control of Generation of Code ('Code Injection')",
-    "severity": "CRITICAL",
-    "description": "L'utilisation d'exec() permet l'exécution de code arbitraire."
+    "severity": "HIGH",
+    "signal_only": true,
+    "description": "exec() exécute du code Python. Le risque dépend notamment de la provenance du code et du contexte d'exécution.",
+    "historical_context": "Aucun CVE unique n'est associé à l'utilisation générique de exec() ; les avis de sécurité concernent des applications et des flux de données particuliers.",
+    "match": {
+      "calls": ["exec", "builtins.exec"]
+    }
+  },
+  "OS_COMMAND_EXECUTION": {
+    "title": "Exécution de commande système",
+    "cwe_id": "CWE-78",
+    "cwe_name": "Improper Neutralization of Special Elements used in an OS Command",
+    "severity": "HIGH",
+    "signal_only": true,
+    "description": "os.system() et os.popen() transmettent une commande au shell. Une donnée contrôlée par un utilisateur peut créer un risque d'injection de commande.",
+    "historical_context": "Le risque dépend de la construction de la commande et de ses entrées ; cette règle ne suit pas les données.",
+    "match": {
+      "calls": ["os.system", "os.popen"]
+    }
+  },
+  "SUBPROCESS_SHELL_TRUE": {
+    "title": "subprocess avec interprétation par le shell",
+    "cwe_id": "CWE-78",
+    "cwe_name": "Improper Neutralization of Special Elements used in an OS Command",
+    "severity": "HIGH",
+    "signal_only": true,
+    "description": "Un appel subprocess avec shell=True demande au shell d'interpréter la commande. Vérifier si des éléments de la commande peuvent être contrôlés de l'extérieur.",
+    "historical_context": "L'utilisation de shell=True n'est pas à elle seule une preuve de vulnérabilité ; le risque dépend des arguments et de leur provenance.",
+    "match": {
+      "calls": [
+        "subprocess.run",
+        "subprocess.Popen",
+        "subprocess.call",
+        "subprocess.check_call",
+        "subprocess.check_output"
+      ],
+      "keyword_equals": {
+        "shell": true
+      }
+    }
+  },
+  "PICKLE_UNSAFE_LOAD": {
+    "title": "Désérialisation avec pickle",
+    "cwe_id": "CWE-502",
+    "cwe_name": "Deserialization of Untrusted Data",
+    "severity": "HIGH",
+    "signal_only": true,
+    "description": "La désérialisation pickle peut exécuter des comportements définis par les objets reconstruits. Ne pas charger de données pickle non fiables.",
+    "historical_context": "Le risque est inhérent au format pickle et dépend de la confiance accordée aux données ; il n'existe pas de CVE unique pour tous ses usages.",
+    "match": {
+      "calls": [
+        "pickle.load",
+        "pickle.loads",
+        "_pickle.load",
+        "_pickle.loads"
+      ]
+    }
+  },
+  "UNSAFE_YAML_LOAD": {
+    "title": "Chargement YAML potentiellement non sûr",
+    "cwe_id": "CWE-502",
+    "cwe_name": "Deserialization of Untrusted Data",
+    "severity": "HIGH",
+    "signal_only": true,
+    "description": "Les chargeurs YAML capables de construire des objets Python peuvent être dangereux avec des données non fiables. Préférer yaml.safe_load ou un SafeLoader explicite.",
+    "historical_cves": [
+      {
+        "id": "CVE-2017-18342",
+        "details": "Exécution de code via yaml.load dans PyYAML 3.12 et versions antérieures lors du chargement d'un document YAML conçu à cet effet."
+      },
+      {
+        "id": "CVE-2020-14343",
+        "details": "Contournement de protections de chargement dans PyYAML, notamment via FullLoader ; corrigé dans PyYAML 5.4."
+      }
+    ],
+    "match": {
+      "calls": [
+        "yaml.load",
+        "yaml.load_all",
+        "yaml.full_load",
+        "yaml.full_load_all",
+        "yaml.unsafe_load",
+        "yaml.unsafe_load_all"
+      ],
+      "skip_if_keyword_names": {
+        "Loader": [
+          "SafeLoader",
+          "CSafeLoader",
+          "yaml.SafeLoader",
+          "yaml.CSafeLoader"
+        ]
+      }
+    }
+  },
+  "TARFILE_EXTRACTALL": {
+    "title": "Extraction d'archive tar",
+    "cwe_id": "CWE-22",
+    "cwe_name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+    "severity": "MEDIUM",
+    "signal_only": true,
+    "description": "L'extraction d'une archive tar peut écrire des fichiers hors du répertoire cible selon son contenu, la version de Python et le filtre utilisé. Vérifier la confiance accordée à l'archive et utiliser un filtre adapté, tel que data.",
+    "historical_cves": [
+      {
+        "id": "CVE-2007-4559",
+        "details": "Path traversal lors de l'extraction d'archives avec tarfile ; l'exposition dépend de l'archive, du code appelant et des protections utilisées."
+      }
+    ],
+    "match": {
+      "attribute_suffixes": ["extractall"]
+    }
+  },
+  "OUTDATED_DEPENDENCIES": {
+    "title": "Dépendances potentiellement vulnérables",
+    "type": "dependency_advisory",
+    "signal_only": true,
+    "description": "Une bibliothèque connue n'est pas vulnérable par son seul nom : il faut comparer sa version et son usage aux versions affectées de chaque avis.",
+    "historical_advisories": [
+      {
+        "package": "requests",
+        "cve_id": "CVE-2023-32681",
+        "details": "Fuite potentielle de Proxy-Authorization dans certains scénarios de redirection HTTPS avec des identifiants de proxy inclus dans l'URL. Corrigé dans Requests 2.31.0.",
+        "url": "https://github.com/psf/requests/security/advisories/GHSA-j8r2-6x86-q33q"
+      },
+      {
+        "package": "urllib3",
+        "cve_id": "CVE-2023-45803",
+        "details": "Fuite possible de l'en-tête Cookie lors de redirections inter-origines dans certaines configurations. Corrigé dans urllib3 1.26.17 et 2.0.6.",
+        "url": "https://github.com/urllib3/urllib3/security/advisories/GHSA-v845-jxx5-vc9f"
+      }
+    ],
+    "analysis_note": "Non détecté par l'analyse AST des fichiers .py. Il faut analyser requirements.txt, les fichiers de verrouillage ou l'environnement installé, puis comparer les versions aux avis."
   }
 }

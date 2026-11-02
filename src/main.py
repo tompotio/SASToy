@@ -16,7 +16,7 @@ def main(argv=None):
     console = Console()
     args = build_parser().parse_args(argv)
 
-    if args.type in {"hash", "binary"}:
+    if args.type == "file":
         if not os.path.isfile(args.target):
             console.print(f"[bold red]Fichier introuvable : {args.target}[/]")
             return 1

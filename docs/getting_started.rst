@@ -23,11 +23,22 @@ Lancez l'analyseur Python :
    python src/main.py py tests/vulnerabilities/unsafe_eval/python/sample.py
 
 Le scanner demande les opérations à exécuter. Exemple pour rechercher les
-appels dangereux :
+signaux de sécurité :
 
 .. code-block:: text
 
-   function_calls
+   security_signals
+
+Cette analyse repère des constructions syntaxiques à examiner (par exemple
+``eval``, ``pickle.loads`` ou une extraction avec ``tarfile.extractall``).
+Un signal n'affirme pas qu'une vulnérabilité est présente : l'analyse ne suit
+pas les données et ne déduit pas leur provenance. Les alias d'import simples
+sont reconnus, mais pas les alias dynamiques ni tous les usages indirects.
+
+Le catalogue contient aussi des avis historiques concernant des dépendances
+telles que Requests et urllib3. Ils sont documentaires : cette opération ne
+vérifie pas les versions installées ou déclarées. Il faut comparer les
+dépendances des fichiers de requirements ou de verrouillage aux avis concernés.
 
 Vérifier l'intégrité d'un fichier
 ---------------------------------
@@ -36,17 +47,20 @@ Fournissez un checksum de référence avec l'algorithme voulu :
 
 .. code-block:: powershell
 
-   python src/main.py hash chemin\vers\fichier.bin --algorithm sha256 --official-hash <haché>
+   python src/main.py file chemin\vers\fichier --algorithm sha256 --official-hash <haché>
 
 La recherche automatique d'un checksum officiel nécessite une variable
 d'environnement ``GEMINI_API_KEY`` :
 
 .. code-block:: powershell
 
-   python src/main.py binary chemin\vers\fichier.bin --algorithm sha256 --web-search
+   python src/main.py file chemin\vers\fichier --algorithm sha256 --web-search
 
-Le mode ``binary`` accepte aussi l'alias ``bin``. L'ancien mode ``exe`` reste
-accepté comme alias de compatibilité.
+La vérification porte sur les octets du fichier, quel que soit son nom ou son
+extension. Lors d'une recherche web, SASToy tente aussi d'extraire des
+métadonnées de version si le contenu est un exécutable Windows PE ; cette
+extraction dépend du format, pas de l'extension. Les autres fichiers sont
+recherchés avec leur nom, sans métadonnées PE.
 
 Générer la documentation
 ------------------------

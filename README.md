@@ -81,31 +81,33 @@ Lancer tous les tests :
 python -m pytest
 ```
 
-## Vérification d'un haché
+## Vérification de l'intégrité d'un fichier
 
-Le mode `hash` calcule le haché d'un fichier et le compare à une valeur de
-référence. Les algorithmes pris en charge sont MD5, SHA-1 et SHA-256. Sans
-option de référence, SASToy demande interactivement l'algorithme et la source
-du haché.
+Le mode `file` calcule le haché d'un fichier et le compare à une valeur de
+référence, sans restriction de type ou d'extension. Les algorithmes pris en
+charge sont MD5, SHA-1 et SHA-256. Sans option de référence, SASToy demande
+interactivement l'algorithme et la source du haché.
 
 Comparer avec un haché fourni :
 
 ```powershell
-python src/main.py hash chemin\vers\fichier.bin --algorithm sha1 --official-hash <haché>
+python src/main.py file chemin\vers\fichier --algorithm sha1 --official-hash <haché>
 ```
 
 Rechercher le haché officiel sur le web (nécessite une clé Gemini dans
 `GEMINI_API_KEY`) :
 
 ```powershell
-python src/main.py binary chemin\vers\fichier.bin --algorithm sha256 --web-search
+python src/main.py file chemin\vers\fichier --algorithm sha256 --web-search
 ```
 
 La recherche web demande à Gemini d'identifier une source officielle et
 n'accepte un haché que si la réponse fournit explicitement le marqueur
 `OFFICIAL_CHECKSUM`. Les comparaisons MD5 et SHA-1 sont disponibles.
-Le mode `binary` accepte aussi l'alias `bin`. L'ancien mode `exe` reste accepté
-comme alias de compatibilité.
+Lorsque le fichier est au format Windows PE, SASToy tente d'extraire ses
+métadonnées de version pour préciser la recherche. La détection se base sur le
+contenu du fichier, pas sur son extension ; aucun format particulier n'est
+requis pour calculer et vérifier son haché.
 
 Afficher les commandes et options à tout moment :
 

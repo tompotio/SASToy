@@ -16,31 +16,99 @@ with open(rules_path, "r", encoding="utf-8") as rules_file:
 
 
 class FunctionCallVisitor(ast.NodeVisitor):
-    """Find potentially dangerous function calls in Python source."""
+    """Find syntax-level calls that warrant a closer security review."""
 
     def __init__(self, filepath):
         """Initialize the visitor for a source file."""
         self.filepath = filepath
         self.findings = []
-        self.dangerous_functions = {
-            "eval": "UNSAFE_EVAL",
-            "exec": "UNSAFE_EXEC",
-        }
+        self.module_aliases = {}
+        self.imported_names = {}
+
+    def visit_Module(self, node):
+        """Resolve straightforward import aliases before inspecting calls."""
+        for child in ast.walk(node):
+            if isinstance(child, ast.Import):
+                for alias in child.names:
+                    local_name = alias.asname or alias.name.split(".")[0]
+                    self.module_aliases[local_name] = (
+                        alias.name if alias.asname else alias.name.split(".")[0]
+                    )
+            elif isinstance(child, ast.ImportFrom) and child.module:
+                for alias in child.names:
+                    local_name = alias.asname or alias.name
+                    self.imported_names[local_name] = (
+                        f"{child.module}.{alias.name}"
+                    )
+
+        self.generic_visit(node)
 
     def visit_Call(self, node):
-        """Collect calls to functions known to be unsafe."""
-        if isinstance(node.func, ast.Name):
-            func_name = node.func.id
-            if func_name in self.dangerous_functions:
+        """Collect calls matching the syntax described by the rule catalog."""
+        call_name = self._resolve_name(node.func)
+        for rule_key, rule in SECURITY_FUNCTION_CALLS_RULES.items():
+            match = rule.get("match")
+            if match and self._matches_rule(node, call_name, match):
                 self.findings.append(
                     {
                         "file": self.filepath,
                         "line": node.lineno,
-                        "rule_key": self.dangerous_functions[func_name],
+                        "rule_key": rule_key,
                     }
                 )
 
         self.generic_visit(node)
+
+    def _resolve_name(self, node):
+        """Return a dotted name, applying aliases from straightforward imports."""
+        if isinstance(node, ast.Name):
+            name = node.id
+        elif isinstance(node, ast.Attribute):
+            parent_name = self._resolve_name(node.value)
+            return f"{parent_name}.{node.attr}" if parent_name else node.attr
+        else:
+            return ""
+
+        if name in self.imported_names:
+            return self.imported_names[name]
+        if name in self.module_aliases:
+            return self.module_aliases[name]
+        return name
+
+    def _matches_rule(self, node, call_name, match):
+        calls = match.get("calls", [])
+        suffixes = match.get("attribute_suffixes", [])
+        matches_name = call_name in calls or (
+            isinstance(node.func, ast.Attribute) and node.func.attr in suffixes
+        )
+        if not matches_name:
+            return False
+
+        for keyword_name, expected_value in match.get(
+            "keyword_equals", {}
+        ).items():
+            keyword = next(
+                (arg for arg in node.keywords if arg.arg == keyword_name),
+                None,
+            )
+            if (
+                keyword is None
+                or not isinstance(keyword.value, ast.Constant)
+                or keyword.value.value != expected_value
+            ):
+                return False
+
+        for keyword_name, safe_names in match.get(
+            "skip_if_keyword_names", {}
+        ).items():
+            keyword = next(
+                (arg for arg in node.keywords if arg.arg == keyword_name),
+                None,
+            )
+            if keyword and self._resolve_name(keyword.value) in safe_names:
+                return False
+
+        return True
 
 
 class PythonAnalyzer(VulnerabilityAnalyzer):
@@ -67,8 +135,8 @@ class PythonAnalyzer(VulnerabilityAnalyzer):
         return bool(PythonAnalyzer.get_files(target_path, recursive))
 
     @staticmethod
-    def analyse_fonctions_vul(files_to_scan):
-        """Display potentially dangerous function calls in Python files."""
+    def analyse_signaux_securite(files_to_scan):
+        """Display syntax-level security signals in Python files."""
         for file in files_to_scan:
             tree = PythonAnalyzer.parse_python_file(file)
             if tree is None:
@@ -78,12 +146,19 @@ class PythonAnalyzer(VulnerabilityAnalyzer):
             visitor.visit(tree)
 
             if visitor.findings:
-                print(f"[!] Vulnérabilités détectées dans le fichier : {file}")
+                print(f"[!] Signaux indicatifs détectés dans le fichier : {file}")
                 for finding in visitor.findings:
+                    rule = SECURITY_FUNCTION_CALLS_RULES[finding["rule_key"]]
                     print(
-                        f"  - Ligne {finding['line']}: {finding['rule_key']} "
-                        "(Appel de fonction potentiellement dangereux)"
+                        f"  - Ligne {finding['line']}: "
+                        f"{rule.get('title', finding['rule_key'])} "
+                        f"({finding['rule_key']})"
                     )
+                    print(f"    {rule['description']}")
+                print(
+                    "    Ces signaux syntaxiques ne constituent pas une preuve "
+                    "de vulnérabilité."
+                )
 
     @staticmethod
     def detect_hardcoded_secrets(file_to_scan):
@@ -114,12 +189,12 @@ class PythonAnalyzer(VulnerabilityAnalyzer):
     def analyze_operation(self, operation, files, console):
         """Run the selected supported operation on Python source files."""
         match operation:
-            case "function_calls":
+            case "security_signals":
                 with console.status(
-                    "[bold cyan]Analyse des appels de fonctions...[/]",
+                    "[bold cyan]Analyse des signaux de sécurité...[/]",
                     spinner="dots",
                 ):
-                    self.analyse_fonctions_vul(files)
+                    self.analyse_signaux_securite(files)
 
             case "cfi":
                 console.print(
