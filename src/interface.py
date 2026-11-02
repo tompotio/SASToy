@@ -5,12 +5,6 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 
 
-def normalize_mode(value):
-    """Normalize binary-mode aliases while preserving the legacy ``exe`` mode."""
-    normalized = value.lower()
-    return "binary" if normalized in {"bin", "exe"} else normalized
-
-
 def build_parser():
     """Build the command-line parser and its supported options."""
     parser = argparse.ArgumentParser(
@@ -21,19 +15,18 @@ def build_parser():
         epilog=(
             "Exemples :\n"
             "  python src/main.py py fichier.py\n"
-            "  python src/main.py hash fichier.bin --algorithm md5 "
+            "  python src/main.py file chemin\\vers\\fichier --algorithm md5 "
             "--official-hash <haché>\n"
-            "  python src/main.py binary fichier.bin --algorithm sha1 --web-search"
+            "  python src/main.py file chemin\\vers\\fichier --algorithm sha1 "
+            "--web-search"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "type",
-        type=normalize_mode,
-        choices=["py", "binary", "hash"],
+        choices=["py", "file"],
         help=(
-            "py (analyse AST), binary/bin (haché d'un binaire), "
-            "hash (haché d'un fichier)"
+            "py (analyse AST), file (vérification d'intégrité d'un fichier)"
         ),
     )
     parser.add_argument(
@@ -84,5 +77,5 @@ def ask_for_operations():
     """Prompt for and return the analysis operations selected by the user."""
     return Prompt.ask(
         "[bold cyan]Opérations à effectuer[/] "
-        "(function_calls, cfi, hcs, sqli ; séparées par des virgules)"
+        "(security_signals, cfi, hcs, sqli ; séparées par des virgules)"
     ).split(",")

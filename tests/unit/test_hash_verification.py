@@ -3,10 +3,12 @@ import io
 import pytest
 from rich.console import Console
 
+from src import integrity
 from src.integrity import (
     calculate_md5,
     calculate_sha1,
     calculate_sha256,
+    extract_metadata,
     extract_official_checksum,
     validate_hash,
     verify_file_hash,
@@ -16,25 +18,21 @@ from src import main as main_module
 
 
 @pytest.mark.parametrize(
-    ("mode", "expected"),
-    [
-        ("binary", "binary"),
-        ("bin", "binary"),
-        ("exe", "binary"),
-        ("hash", "hash"),
-    ],
+    "filename",
+    ["sample.exe", "sample.bin", "sample.bash", "sample"],
 )
-def test_parser_normalizes_integrity_modes(mode, expected):
-    args = build_parser().parse_args([mode, "sample.bin"])
+def test_file_mode_accepts_arbitrary_file_names(filename):
+    args = build_parser().parse_args(["file", filename])
 
-    assert args.type == expected
+    assert args.type == "file"
+    assert args.target == filename
 
 
-def test_main_runs_integrity_verification_for_binary_mode(monkeypatch):
+def test_main_runs_integrity_verification_for_file_mode(monkeypatch):
     monkeypatch.setattr(main_module.os.path, "isfile", lambda _target: True)
     monkeypatch.setattr(main_module, "run_hash_verification", lambda *_args: True)
 
-    assert main_module.main(["binary", "sample.bin"]) == 0
+    assert main_module.main(["file", "sample.bash"]) == 0
 
 
 @pytest.mark.parametrize(
@@ -53,6 +51,33 @@ def test_hash_calculators(tmp_path, calculator, expected):
     sample.write_bytes(b"abc")
 
     assert calculator(str(sample)) == expected
+
+
+def test_extract_metadata_skips_non_pe_files_regardless_of_extension(tmp_path):
+    sample = tmp_path / "named-like-exe.exe"
+    sample.write_bytes(b"#!/bin/sh\n")
+
+    assert extract_metadata(str(sample)) == {}
+
+
+def test_extract_metadata_uses_file_format_not_extension(tmp_path, monkeypatch):
+    sample = tmp_path / "windows-program.bash"
+    sample.write_bytes(b"MZ")
+    parsed_files = []
+
+    class FakePE:
+        FileInfo = []
+
+        def __init__(self, path):
+            parsed_files.append(path)
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(integrity.pefile, "PE", FakePE)
+
+    assert extract_metadata(str(sample)) == {}
+    assert parsed_files == [str(sample)]
 
 
 def test_validate_hash_normalizes_case():

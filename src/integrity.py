@@ -80,10 +80,14 @@ def extract_official_checksum(result, algorithm):
 
 
 def extract_metadata(file_path):
-    """Extract version information from a Windows PE binary."""
+    """Extract version information when the file contains a Windows PE image."""
     metadata = {}
 
     try:
+        with open(file_path, "rb") as file:
+            if file.read(2) != b"MZ":
+                return metadata
+
         pe = pefile.PE(file_path)
         try:
             for file_info in getattr(pe, "FileInfo", []):
@@ -119,7 +123,7 @@ def search_official_checksum(metadata, filename, algorithm="sha256"):
   You are assisting with defensive software integrity verification.
 
   Filename: {filename}
-  Binary metadata: {metadata}
+  File metadata: {metadata}
 
   Search the web for the official publisher's release page or checksum
   manifest for this exact product and version.
@@ -209,7 +213,7 @@ def run_hash_verification(args, console):
         args.web_search = source == "web"
 
     if args.web_search:
-        metadata = extract_metadata(args.target) if args.type == "binary" else {}
+        metadata = extract_metadata(args.target)
         with console.status(
             "[bold cyan]Recherche du haché officiel sur le web...[/]",
             spinner="dots",
