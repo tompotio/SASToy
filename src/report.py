@@ -150,8 +150,7 @@ footer{{padding:24px;color:var(--muted);text-align:center}}@media(max-width:600p
 <header><div class="eyebrow">SASTOY · RAPPORT EXHAUSTIF</div>
 <h1>Résultats des stratégies</h1>
 <p><span class="badge">AGRÉGAT BRUT · SANS SYNTHÈSE NI SCORING</span></p>
-<p>Les résultats ci-dessous proviennent des stratégies exécutées. Les constats
-ne sont ni dédupliqués ni interprétés par une synthèse.</p>
+<p>Les résultats ci-dessous proviennent des stratégies exécutées.</p>
 </header>
 <div class="grid">
 <div class="card"><div class="muted">Cible</div><div class="value">{_escape(target)}</div></div>
