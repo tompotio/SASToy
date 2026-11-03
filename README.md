@@ -6,16 +6,17 @@ Petit projet de Static Application Security Testing (SAST) conçu pour apprendre
 
 ## Structure du projet
 
-- `src/` : Contient le code source de notre moteur de scan SAST.
+- `src/` : Contient le code source de l'interface CLI et des outils SASToy.
 - `tests/` : Regroupe les tests unitaires, les échantillons vulnérables par catégorie et langage, et les fixtures.
 - `Dockerfile` : Configuration pour exécuter l'outil dans un conteneur Docker indépendant du système d'exploitation.
-- `requirements.txt` : Liste des dépendances Python du projet avec leurs versions exactes.
+- `requirements.txt` : Liste des dépendances Python du projet.
 
 Le code source sépare l'interface en ligne de commande (`src/interface.py`),
 l'orchestration (`src/main.py`), les utilitaires (`src/utils.py`) et la
-vérification d'intégrité (`src/integrity.py`). Les analyses de vulnérabilités
-reposent sur le contrat `VulnerabilityAnalyzer` dans `src/analyzers/base.py`,
-implémenté pour Python dans `src/analyzers/python.py`.
+vérification d'intégrité (`src/integrity.py`). Les quatre stratégies Python
+sont définies dans `src/strategies.py`, mais ne sont pas encore implémentées :
+les modes manuel et exhaustif ne font actuellement qu'afficher leur statut.
+Le mode exhaustif génère un rapport HTML sans résultats de scan.
 
 ---
 
@@ -62,18 +63,17 @@ Dans PowerShell, depuis la racine du dépôt :
    docker build -t sastoy .
    ```
 
-2. **Exécuter le scanner :**
+2. **Ouvrir l'interface :**
    ```bash
    docker run --rm --isolation=process -v "${PWD}:C:\app" sastoy py C:\app\tests\vulnerabilities\unsafe_eval\python\sample.py
    ```
 
 ## Organisation des tests
 
-Les tests unitaires sont dans `tests/unit/`. Les tests ciblant une vulnérabilité
-et leurs échantillons sont regroupés sous
-`tests/vulnerabilities/<categorie>/<langage>/` (par exemple
-`tests/vulnerabilities/hardcoded_secrets/python/`). Les données de test
-génériques sont stockées dans `tests/fixtures/`.
+Les tests sont dans `tests/unit/`. Les exemples de code vulnérable, conservés
+comme données pédagogiques, sont regroupés sous
+`tests/vulnerabilities/<categorie>/<langage>/`. Les données de test génériques
+sont stockées dans `tests/fixtures/`.
 
 Lancer tous les tests :
 

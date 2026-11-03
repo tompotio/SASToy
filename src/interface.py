@@ -2,17 +2,18 @@ import argparse
 
 from rich.console import Console
 from rich.panel import Panel
-from rich.prompt import Confirm, Prompt
+from rich.prompt import Prompt
 
+from src.strategies import STRATEGIES
 
-IMPLEMENTED_STRATEGIES = ("security_signals", "hcs")
+STRATEGY_IDS = tuple(STRATEGIES)
 
 
 def build_parser():
     """Build the command-line parser and its supported options."""
     parser = argparse.ArgumentParser(
         description=(
-            "SASToy - analyseur statique Python et outil de vérification "
+            "SASToy - stratégies d'analyse Python et outil de vérification "
             "d'intégrité."
         ),
         epilog=(
@@ -29,7 +30,8 @@ def build_parser():
         "type",
         choices=["py", "file"],
         help=(
-            "py (analyse AST), file (vérification d'intégrité d'un fichier)"
+            "py (stratégies Python, non implémentées), "
+            "file (vérification d'intégrité d'un fichier)"
         ),
     )
     parser.add_argument(
@@ -45,10 +47,10 @@ def build_parser():
     parser.add_argument(
         "--strategies",
         nargs="+",
-        choices=IMPLEMENTED_STRATEGIES,
+        choices=STRATEGY_IDS,
         help=(
-            "Stratégies à inclure en mode exhaustif "
-            "(par défaut : toutes celles implémentées)"
+            "Stratégies à inclure dans le rapport exhaustif "
+            "(par défaut : les quatre stratégies)"
         ),
     )
     parser.add_argument(
@@ -90,11 +92,11 @@ def show_python_files(console, files):
     )
 
 
-def ask_for_operations():
-    """Prompt for and return the analysis operations selected by the user."""
+def ask_for_manual_strategies():
+    """Prompt for strategy identifiers in manual mode."""
     return Prompt.ask(
-        "[bold cyan]Opérations à effectuer[/] "
-        "(security_signals, cfi, hcs, sqli ; séparées par des virgules)"
+        "[bold cyan]Stratégies à sélectionner[/] "
+        f"({', '.join(STRATEGY_IDS)} ; séparées par des virgules)"
     ).split(",")
 
 
@@ -107,9 +109,9 @@ def ask_for_mode():
     )
 
 
-def ask_for_strategies():
-    """Prompt for the implemented strategies selected for a demo report."""
-    default = ",".join(IMPLEMENTED_STRATEGIES)
+def ask_for_exhaustive_strategies():
+    """Prompt for strategies to list in the exhaustive-mode report."""
+    default = ",".join(STRATEGY_IDS)
     selected = Prompt.ask(
         "[bold cyan]Stratégies (séparées par des virgules)[/]",
         default=default,
@@ -119,26 +121,10 @@ def ask_for_strategies():
         for strategy in selected.split(",")
         if strategy.strip()
     ]
-    invalid = sorted(set(strategies) - set(IMPLEMENTED_STRATEGIES))
+    invalid = sorted(set(strategies) - set(STRATEGY_IDS))
     if invalid:
         raise ValueError(
-            "Stratégie(s) non implémentée(s) ou inconnue(s) : "
+            "Stratégie(s) inconnue(s) : "
             + ", ".join(invalid)
         )
     return list(dict.fromkeys(strategies))
-
-
-def ask_for_ai_consent():
-    """Ask separately whether a Gemini token exists and whether to use Gemini."""
-    has_token = Confirm.ask(
-        "Disposez-vous d'un token Gemini configuré dans GEMINI_API_KEY ?",
-        default=False,
-    )
-    if not has_token:
-        return False
-
-    return Confirm.ask(
-        "Autorisez-vous Gemini à analyser un résumé anonymisé "
-        "pour cette analyse ?",
-        default=False,
-    )

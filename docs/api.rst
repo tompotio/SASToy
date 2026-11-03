@@ -15,6 +15,15 @@ Analyseurs
    :members:
    :show-inheritance:
 
+Contrat des résultats et agrégation
+-----------------------------------
+
+.. automodule:: src.results
+   :members:
+
+.. automodule:: src.aggregation
+   :members:
+
 Vérification d'intégrité
 ------------------------
 
@@ -30,11 +39,8 @@ Interface en ligne de commande
 .. automodule:: src.main
    :members:
 
-Prototype exhaustif et rapports
--------------------------------
-
-.. automodule:: src.exhaustive
-   :members:
+Rapports
+--------
 
 .. automodule:: src.report
    :members:

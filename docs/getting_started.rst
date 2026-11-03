@@ -16,41 +16,40 @@ dépendances :
 Analyser un fichier Python
 --------------------------
 
-Lancez l'analyseur Python :
+Lancez l'interface Python pour choisir les stratégies :
 
 .. code-block:: powershell
 
    python src/main.py py tests/vulnerabilities/unsafe_eval/python/sample.py
 
-Le scanner demande les opérations à exécuter. Exemple pour rechercher les
-signaux de sécurité :
+Le mode manuel demande une ou plusieurs stratégies à sélectionner. Elles sont
+exécutées séquentiellement et chacune affiche son résultat dans le terminal.
+Ce mode s'arrête aux résultats individuels : il ne lance ni agrégation, ni
+synthèse, ni génération de rapport HTML. Exemple :
 
 .. code-block:: text
 
-   security_signals
+   ast_pattern_scan, cfg_analysis, secret_scan, symbolic_execution
 
-Cette analyse repère des constructions syntaxiques à examiner (par exemple
-``eval``, ``pickle.loads`` ou une extraction avec ``tarfile.extractall``).
-Un signal n'affirme pas qu'une vulnérabilité est présente : l'analyse ne suit
-pas les données et ne déduit pas leur provenance. Les alias d'import simples
-sont reconnus, mais pas les alias dynamiques ni tous les usages indirects.
+Les quatre stratégies proposées sont ``ast_pattern_scan`` (repérage de motifs
+syntaxiques), ``cfg_analysis`` (moteur prévu pour CFI et analyse de flot/taint
+et SQLi), ``secret_scan`` (HCS) et ``symbolic_execution``. ``ast_pattern_scan``
+et ``secret_scan`` sont implémentées. ``cfg_analysis`` et
+``symbolic_execution`` retournent un statut « indisponible » et un diagnostic ;
+leurs constats restent vides tant que leurs analyses ne sont pas implémentées.
+Les signaux AST ne prouvent pas à eux seuls une vulnérabilité, et la détection
+HCS n'expose pas la valeur détectée.
 
-Le catalogue contient aussi des avis historiques concernant des dépendances
-telles que Requests et urllib3. Ils sont documentaires : cette opération ne
-vérifie pas les versions installées ou déclarées. Il faut comparer les
-dépendances des fichiers de requirements ou de verrouillage aux avis concernés.
+Mode exhaustif
+--------------
 
-Mode exhaustif (prototype)
---------------------------
+Le mode exhaustif exécute séquentiellement les stratégies sélectionnées,
+agrège leurs résultats et génère un rapport HTML de l'agrégat brut. Les
+constats restent séparés par stratégie ; aucune déduplication, synthèse ou
+scoring n'est effectué pour le moment. Une stratégie indisponible est marquée
+comme telle dans le rapport.
 
-Le mode exhaustif est un prototype d'interface et de rapport : ses sorties,
-comptages et recommandations sont fictifs et aucune stratégie n'analyse la
-cible. Il ne faut pas interpréter ses exemples comme des résultats de scan.
-Les stratégies sélectionnées par défaut sont celles actuellement implémentées
-(``security_signals`` et ``hcs``) ; CFI et SQLi sont indiquées comme non
-implémentées.
-
-Lancez le prototype et sélectionnez les stratégies dans l'invite :
+Lancez le mode exhaustif et sélectionnez les stratégies dans l'invite :
 
 .. code-block:: powershell
 
@@ -60,18 +59,12 @@ Pour sélectionner les stratégies sans invite :
 
 .. code-block:: powershell
 
-   python src/main.py py chemin\vers\projet --mode exhaustif --strategies security_signals hcs
+   python src/main.py py chemin\vers\projet --mode exhaustif --strategies ast_pattern_scan cfg_analysis secret_scan symbolic_execution
 
 Sans ``--mode``, SASToy demande de choisir entre le mode manuel (valeur par
-défaut) et le mode exhaustif. Dans le prototype exhaustif, un rapport HTML
-autonome est créé sous ``reports/`` dans le répertoire courant. Le chemin du
-rapport est affiché dans le terminal ; il n'est pas ouvert automatiquement.
-
-Le CLI demande si un token Gemini est configuré, puis, le cas échéant, un
-consentement distinct avant l'envoi d'un résumé anonymisé. Seuls les noms des
-stratégies et leurs nombres d'exemples fictifs sont transmis ; ni le code, ni
-les chemins de fichiers, ni les valeurs de secrets ne sont envoyés. La partie
-IA reste distincte des sorties locales dans le rapport.
+défaut) et le mode exhaustif. En mode exhaustif, un rapport HTML autonome est
+créé sous ``reports/`` dans le répertoire courant. Le chemin du rapport est
+affiché dans le terminal ; il n'est pas ouvert automatiquement.
 
 Vérifier l'intégrité d'un fichier
 ---------------------------------
