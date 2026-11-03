@@ -16,23 +16,29 @@ Le code est divisé par responsabilité :
    * - ``src.analyzers.base``
      - Contrat abstrait commun aux analyseurs de vulnérabilités par langage.
    * - ``src.analyzers.python``
-     - Sélection des fichiers Python, détection de signaux syntaxiques définis dans le catalogue et détection de secrets.
-   * - ``src.rules``
-     - Catalogues de règles propres à chaque langage, notamment ``python_security.json`` pour l'analyseur Python.
+     - Sélection des fichiers Python, exécution des stratégies AST et HCS et définition des sorties indisponibles pour CFG et l'exécution symbolique.
+   * - ``src.results`` et ``src.aggregation``
+     - Contrats typés des résultats et regroupement ordonné des constats sans scoring ni déduplication.
+   * - ``src.report``
+     - Présentation HTML des résultats individuels et de l'agrégat brut du mode exhaustif, sans synthèse ni scoring.
+   * - ``src.strategies``
+     - Identifiants et libellés communs des quatre stratégies proposées.
    * - ``src.integrity``
      - Calcul et vérification des hachages, indépendamment des analyseurs de langage.
    * - ``src.utils``
      - Utilitaires de découverte de fichiers.
 
-Ajouter un analyseur pour un langage doit consister à implémenter
-``VulnerabilityAnalyzer`` avec les opérations prises en charge pour ce langage.
-Ses règles doivent résider dans un catalogue propre à ce langage sous
-``src/rules/`` ; les analyseurs d'autres langages ne réutilisent pas le
-catalogue Python.
-Les fonctions d'intégrité restent en dehors de cette hiérarchie, car elles ne
-dépendent pas de la syntaxe ou du langage analysé.
+Les stratégies ``ast_pattern_scan`` et ``secret_scan`` sont exécutées en mode
+manuel et affichent leurs résultats individuels dans le terminal. Les
+stratégies ``cfg_analysis`` et ``symbolic_execution`` ont un contrat de
+résultat défini, mais restent indisponibles. Le mode manuel ne lance ni
+agrégation, ni synthèse, ni rapport HTML. Les fonctions d'intégrité restent en
+dehors de cette hiérarchie, car elles ne dépendent pas de la syntaxe ou du
+langage analysé.
 
-L'analyse des appels Python est heuristique : elle repère des constructions
-syntaxiques indicatives sans démontrer qu'une vulnérabilité est exploitable.
-Les avis sur les dépendances présentes dans le catalogue sont documentaires ;
-la passe AST ne vérifie pas les versions déclarées ou installées.
+Le mode manuel et le mode exhaustif exposent les mêmes quatre stratégies :
+``ast_pattern_scan``, ``cfg_analysis`` (CFI et analyse de flot/taint et SQLi),
+``secret_scan`` (HCS) et ``symbolic_execution``. Le mode exhaustif exécute les
+stratégies sélectionnées séquentiellement, agrège leurs résultats sans
+déduplication ni scoring, puis les transmet au rapport HTML. La synthèse des
+constats reste à implémenter.

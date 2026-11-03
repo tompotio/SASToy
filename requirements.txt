@@ -1,17 +1,13 @@
-# Pour automatiser les tests unitaires des règles de sécurité
+# Tests
 pytest>=8.0.0
 
-# Pour un l'affichage terminal, coloré et des rapports structurés
+# Interface en ligne de commande
 rich>=13.0.0
 
+# Recherche de hachages de référence
 google-genai
-
 pefile
 
-detect_secrets
-
-# Génération de la documentation du projet
+# Documentation
 sphinx>=7.0
 furo>=2024.8.6
-
-# La bibliothèque standard de Python contient déjà : ast, sys, os et json

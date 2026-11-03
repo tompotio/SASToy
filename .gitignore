@@ -50,3 +50,6 @@ Desktop.ini
 
 # Installateurs binaires volumineux utilisés comme fixtures locales
 /tests/fixtures/executables/*.exe
+
+# Fichiers de report
+/reports/*

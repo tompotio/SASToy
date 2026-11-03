@@ -1,31 +1,43 @@
+"""Python source discovery and security-analysis strategies."""
+
 import ast
 import json
 from pathlib import Path
+from typing import Any
 
 from detect_secrets import SecretsCollection
 from detect_secrets.settings import default_settings
 from rich.console import Console
 
 from src.analyzers.base import VulnerabilityAnalyzer
+from src.results import (
+    AnalysisDiagnostic,
+    Finding,
+    FindingOrigin,
+    Location,
+    PatternEvidence,
+    SecretEvidence,
+    StrategyResult,
+)
+from src.strategies import STRATEGIES
 from src.utils import get_files_by_extension
 
 
-rules_path = Path(__file__).resolve().parents[1] / "rules" / "python_security.json"
-with open(rules_path, "r", encoding="utf-8") as rules_file:
-    PYTHON_SECURITY_RULES = json.load(rules_file)
+_RULES_PATH = Path(__file__).resolve().parents[1] / "rules" / "python_security.json"
+with _RULES_PATH.open(encoding="utf-8") as _rules_file:
+    PYTHON_SECURITY_RULES = json.load(_rules_file)
 
 
 class FunctionCallVisitor(ast.NodeVisitor):
     """Find syntax-level calls that warrant a closer security review."""
 
-    def __init__(self, filepath):
-        """Initialize the visitor for a source file."""
+    def __init__(self, filepath: str) -> None:
         self.filepath = filepath
-        self.findings = []
-        self.module_aliases = {}
-        self.imported_names = {}
+        self.findings: list[dict[str, Any]] = []
+        self.module_aliases: dict[str, str] = {}
+        self.imported_names: dict[str, str] = {}
 
-    def visit_Module(self, node):
+    def visit_Module(self, node: ast.Module) -> None:
         """Resolve straightforward import aliases before inspecting calls."""
         for child in ast.walk(node):
             if isinstance(child, ast.Import):
@@ -43,7 +55,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def visit_Call(self, node):
+    def visit_Call(self, node: ast.Call) -> None:
         """Collect calls matching the syntax described by the rule catalog."""
         call_name = self._resolve_name(node.func)
         for rule_key, rule in PYTHON_SECURITY_RULES.items():
@@ -59,7 +71,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def _resolve_name(self, node):
+    def _resolve_name(self, node: ast.expr) -> str:
         """Return a dotted name, applying aliases from straightforward imports."""
         if isinstance(node, ast.Name):
             name = node.id
@@ -75,7 +87,12 @@ class FunctionCallVisitor(ast.NodeVisitor):
             return self.module_aliases[name]
         return name
 
-    def _matches_rule(self, node, call_name, match):
+    def _matches_rule(
+        self,
+        node: ast.Call,
+        call_name: str,
+        match: dict[str, Any],
+    ) -> bool:
         calls = match.get("calls", [])
         suffixes = match.get("attribute_suffixes", [])
         matches_name = call_name in calls or (
@@ -112,7 +129,7 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
 
 class PythonAnalyzer(VulnerabilityAnalyzer):
-    """Vulnerability analyses implemented for Python source files."""
+    """Python source discovery and strategy entry points."""
 
     @staticmethod
     def get_files(target_path, recursive=False):
@@ -120,49 +137,34 @@ class PythonAnalyzer(VulnerabilityAnalyzer):
         return get_files_by_extension(target_path, ".py", recursive)
 
     @staticmethod
-    def parse_python_file(file):
-        """Parse a Python file and return its AST."""
+    def _parse_python_file(
+        file: str,
+    ) -> tuple[ast.Module | None, AnalysisDiagnostic | None]:
         try:
             with open(file, "r", encoding="utf-8") as source_file:
-                return ast.parse(source_file.read())
-        except Exception as exc:
-            print(f"[!] Erreur lors de l'analyse du fichier {file}: {exc}")
-            return None
+                return ast.parse(source_file.read()), None
+        except (OSError, UnicodeError, SyntaxError) as exc:
+            return None, AnalysisDiagnostic(
+                code="python_parse_error",
+                message=f"{type(exc).__name__}: {exc}",
+                file=file,
+                line=getattr(exc, "lineno", None),
+            )
 
     @staticmethod
-    def is_python_check(target_path, recursive=False):
-        """Return whether a path contains Python source files."""
-        return bool(PythonAnalyzer.get_files(target_path, recursive))
-
-    @staticmethod
-    def analyse_signaux_securite(files_to_scan):
-        """Display syntax-level security signals in Python files."""
-        for file in files_to_scan:
-            tree = PythonAnalyzer.parse_python_file(file)
-            if tree is None:
-                continue
-
-            visitor = FunctionCallVisitor(file)
-            visitor.visit(tree)
-
-            if visitor.findings:
-                print(f"[!] Signaux indicatifs détectés dans le fichier : {file}")
-                for finding in visitor.findings:
-                    rule = PYTHON_SECURITY_RULES[finding["rule_key"]]
-                    print(
-                        f"  - Ligne {finding['line']}: "
-                        f"{rule.get('title', finding['rule_key'])} "
-                        f"({finding['rule_key']})"
-                    )
-                    print(f"    {rule['description']}")
-                print(
-                    "    Ces signaux syntaxiques ne constituent pas une preuve "
-                    "de vulnérabilité."
-                )
+    def parse_python_file(file):
+        """Parse a Python file and return its AST, or None on parse failure."""
+        tree, diagnostic = PythonAnalyzer._parse_python_file(file)
+        if diagnostic:
+            print(
+                f"[!] Erreur lors de l'analyse du fichier {file}: "
+                f"{diagnostic.message}"
+            )
+        return tree
 
     @staticmethod
     def detect_hardcoded_secrets(file_to_scan):
-        """Detect hardcoded secrets in a Python source file."""
+        """Return secret detector metadata without exposing secret values."""
         path = Path(file_to_scan)
         if not path.is_file() or path.suffix != ".py":
             raise ValueError(
@@ -181,49 +183,169 @@ class PythonAnalyzer(VulnerabilityAnalyzer):
                     {
                         "file": filename,
                         "line": detection.get("line_number"),
+                        "detector": detection.get("type", "unknown"),
+                        "verified": bool(detection.get("is_verified", False)),
                     }
                 )
 
         return findings
 
+    def analyze_strategy(self, strategy: str, files: list[str]) -> StrategyResult:
+        """Run one strategy and return its normalized result contract."""
+        if strategy == "ast_pattern_scan":
+            return self._analyze_ast_patterns(files)
+        if strategy == "secret_scan":
+            return self._analyze_secrets(files)
+        if strategy in {"cfg_analysis", "symbolic_execution"}:
+            return StrategyResult(
+                strategy=strategy,
+                status="unavailable",
+                diagnostics=[
+                    AnalysisDiagnostic(
+                        code="strategy_not_implemented",
+                        message=(
+                            f"La stratégie {strategy} est définie mais son "
+                            "analyse n'est pas encore implémentée."
+                        ),
+                    )
+                ],
+            )
+        raise ValueError(f"Stratégie inconnue : {strategy}")
+
+    @staticmethod
+    def _analyze_ast_patterns(files: list[str]) -> StrategyResult:
+        findings = []
+        diagnostics = []
+        successful_files = 0
+
+        for file in files:
+            tree, diagnostic = PythonAnalyzer._parse_python_file(file)
+            if diagnostic:
+                diagnostics.append(diagnostic)
+                continue
+
+            successful_files += 1
+            visitor = FunctionCallVisitor(file)
+            visitor.visit(tree)
+
+            for match in visitor.findings:
+                rule_id = match["rule_key"]
+                rule = PYTHON_SECURITY_RULES[rule_id]
+                finding = Finding(
+                    rule_id=rule_id,
+                    kind="signal",
+                    category="security_signal",
+                    severity=rule.get("severity", "unknown").lower(),
+                    confidence=None,
+                    message=rule.get("title", rule_id),
+                    location=Location(
+                        file=file,
+                        start_line=match["line"],
+                        end_line=match["line"],
+                    ),
+                    evidence=PatternEvidence(
+                        description=rule["description"],
+                        cwe_id=rule.get("cwe_id"),
+                        cwe_name=rule.get("cwe_name"),
+                    ),
+                    origin=FindingOrigin(strategy="ast_pattern_scan"),
+                )
+                findings.append(finding)
+
+        return StrategyResult(
+            strategy="ast_pattern_scan",
+            status=PythonAnalyzer._result_status(
+                files, successful_files, diagnostics
+            ),
+            findings=findings,
+            diagnostics=diagnostics,
+        )
+
+    @staticmethod
+    def _analyze_secrets(files: list[str]) -> StrategyResult:
+        findings = []
+        diagnostics = []
+        successful_files = 0
+
+        for file in files:
+            try:
+                detected = PythonAnalyzer.detect_hardcoded_secrets(file)
+            except (OSError, UnicodeError, ValueError) as exc:
+                diagnostics.append(
+                    AnalysisDiagnostic(
+                        code="secret_scan_error",
+                        message=f"{type(exc).__name__}: {exc}",
+                        file=file,
+                    )
+                )
+                continue
+
+            successful_files += 1
+            for detection in detected:
+                line = detection["line"]
+                findings.append(
+                    Finding(
+                        rule_id="HARDCODED_SECRET",
+                        kind="secret",
+                        category="hardcoded_secret",
+                        severity="unknown",
+                        confidence=None,
+                        message="Valeur ressemblant à un secret détectée.",
+                        location=Location(
+                            file=detection["file"],
+                            start_line=line,
+                            end_line=line,
+                        ),
+                        evidence=SecretEvidence(
+                            detector=detection["detector"],
+                            verified=detection["verified"],
+                        ),
+                        origin=FindingOrigin(strategy="secret_scan"),
+                    )
+                )
+
+        return StrategyResult(
+            strategy="secret_scan",
+            status=PythonAnalyzer._result_status(
+                files, successful_files, diagnostics
+            ),
+            findings=findings,
+            diagnostics=diagnostics,
+        )
+
+    @staticmethod
+    def _result_status(files, successful_files, diagnostics):
+        if not diagnostics:
+            return "completed"
+        if successful_files == 0 and files:
+            return "failed"
+        return "partial"
+
+    @staticmethod
+    def display_strategy_result(result: StrategyResult, console: Console) -> None:
+        """Display findings and diagnostics without exposing secret contents."""
+        label = STRATEGIES[result.strategy]
+        console.print(f"[bold cyan]{label} — {result.status}[/]")
+        for finding in result.findings:
+            location = finding.location
+            where = (
+                f"{location.file}:{location.start_line}"
+                if location and location.start_line is not None
+                else (location.file if location else "emplacement inconnu")
+            )
+            console.print(
+                f"  - {where}: {finding.message} [{finding.rule_id}]"
+            )
+        for diagnostic in result.diagnostics:
+            where = f"{diagnostic.file}: " if diagnostic.file else ""
+            console.print(f"  [yellow]Avertissement : {where}{diagnostic.message}[/]")
+
     def analyze_operation(self, operation, files, console):
-        """Run the selected supported operation on Python source files."""
-        match operation:
-            case "security_signals":
-                with console.status(
-                    "[bold cyan]Analyse des signaux de sécurité...[/]",
-                    spinner="dots",
-                ):
-                    self.analyse_signaux_securite(files)
+        """Run a strategy and display its normalized result."""
+        if operation not in STRATEGIES:
+            console.print(f"[bold red]Opération inconnue : {operation}[/]")
+            return None
 
-            case "cfi":
-                console.print(
-                    "[yellow]Analyse CFI (Control Flow Integrity) non implémentée.[/]"
-                )
-
-            case "hcs":
-                console.print(
-                    "[yellow]Analyse HCS (Hardcoded Secrets) en cours...[/]"
-                )
-                for file in files:
-                    secrets = self.detect_hardcoded_secrets(file)
-                    if secrets:
-                        console.print(
-                            f"[bold red]Secrets codés en dur détectés dans "
-                            f"{file} :[/]"
-                        )
-                        for secret in secrets:
-                            console.print(f"  - Ligne {secret['line']}")
-                    else:
-                        console.print(
-                            f"[green]Aucun secret codé en dur détecté dans "
-                            f"{file}.[/]"
-                        )
-
-            case "sqli":
-                console.print(
-                    "[yellow]Analyse SQLi (SQL Injection) non implémentée.[/]"
-                )
-
-            case _:
-                console.print(f"[bold red]Opération inconnue : {operation}[/]")
+        result = self.analyze_strategy(operation, files)
+        self.display_strategy_result(result, console)
+        return result

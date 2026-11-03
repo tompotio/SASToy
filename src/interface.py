@@ -4,13 +4,17 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 
+from src.strategies import STRATEGIES
+
+STRATEGY_IDS = tuple(STRATEGIES)
+
 
 def build_parser():
     """Build the command-line parser and its supported options."""
     parser = argparse.ArgumentParser(
         description=(
-            "SASToy - analyseur statique Python et outil de vérification "
-            "d'intégrité par haché."
+            "SASToy - stratégies d'analyse Python et outil de vérification "
+            "d'intégrité."
         ),
         epilog=(
             "Exemples :\n"
@@ -26,13 +30,28 @@ def build_parser():
         "type",
         choices=["py", "file"],
         help=(
-            "py (analyse AST), file (vérification d'intégrité d'un fichier)"
+            "py (stratégies Python, non implémentées), "
+            "file (vérification d'intégrité d'un fichier)"
         ),
     )
     parser.add_argument(
         "target",
         type=str,
         help="Chemin du fichier ou du dossier à analyser",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["manuel", "exhaustif"],
+        help="Mode d'analyse (par défaut : choix interactif)",
+    )
+    parser.add_argument(
+        "--strategies",
+        nargs="+",
+        choices=STRATEGY_IDS,
+        help=(
+            "Stratégies à inclure dans le rapport exhaustif "
+            "(par défaut : les quatre stratégies)"
+        ),
     )
     parser.add_argument(
         "-r",
@@ -73,9 +92,39 @@ def show_python_files(console, files):
     )
 
 
-def ask_for_operations():
-    """Prompt for and return the analysis operations selected by the user."""
+def ask_for_manual_strategies():
+    """Prompt for strategy identifiers in manual mode."""
     return Prompt.ask(
-        "[bold cyan]Opérations à effectuer[/] "
-        "(security_signals, cfi, hcs, sqli ; séparées par des virgules)"
+        "[bold cyan]Stratégies à sélectionner[/] "
+        f"({', '.join(STRATEGY_IDS)} ; séparées par des virgules)"
     ).split(",")
+
+
+def ask_for_mode():
+    """Prompt for the analysis mode."""
+    return Prompt.ask(
+        "[bold cyan]Mode d'analyse[/]",
+        choices=["manuel", "exhaustif"],
+        default="manuel",
+    )
+
+
+def ask_for_exhaustive_strategies():
+    """Prompt for strategies to list in the exhaustive-mode report."""
+    default = ",".join(STRATEGY_IDS)
+    selected = Prompt.ask(
+        "[bold cyan]Stratégies (séparées par des virgules)[/]",
+        default=default,
+    )
+    strategies = [
+        strategy.strip()
+        for strategy in selected.split(",")
+        if strategy.strip()
+    ]
+    invalid = sorted(set(strategies) - set(STRATEGY_IDS))
+    if invalid:
+        raise ValueError(
+            "Stratégie(s) inconnue(s) : "
+            + ", ".join(invalid)
+        )
+    return list(dict.fromkeys(strategies))
