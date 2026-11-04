@@ -1,0 +1,59 @@
+{
+  "version": 2,
+  "vulnerabilities": [
+    {
+      "id": "tar-extraction",
+      "title": "Extraction d'archive tar risquée",
+      "file": "bank_api/documents/archive.py",
+      "rule_ids": ["TARFILE_EXTRACTALL"]
+    },
+    {
+      "id": "dynamic-evaluation",
+      "title": "Évaluation de code non fiable",
+      "file": "bank_api/reports/formula.py",
+      "rule_ids": ["UNSAFE_EVAL"]
+    },
+    {
+      "id": "unsafe-pickle",
+      "title": "Désérialisation non sûre par pickle",
+      "file": "bank_api/storage/sessions.py",
+      "rule_ids": ["PICKLE_UNSAFE_LOAD"]
+    },
+    {
+      "id": "shell-command",
+      "title": "Commande construite avec shell=True",
+      "file": "bank_api/support/diagnostics.py",
+      "rule_ids": ["SUBPROCESS_SHELL_TRUE"]
+    },
+    {
+      "id": "weak-password-hash",
+      "title": "Hachage faible des mots de passe",
+      "file": "bank_api/auth/passwords.py",
+      "rule_ids": ["TAINT_WEAK_CRYPTOGRAPHY"]
+    },
+    {
+      "id": "predictable-token",
+      "title": "Génération pseudo-aléatoire prévisible",
+      "file": "bank_api/auth/tokens.py",
+      "rule_ids": ["TAINT_WEAK_PRNG"]
+    },
+    {
+      "id": "unconfined-file-read",
+      "title": "Lecture de fichier sans confinement",
+      "file": "bank_api/documents/files.py",
+      "rule_ids": ["TAINT_PATH_TRAVERSAL_OPEN"]
+    },
+    {
+      "id": "command-injection-flow",
+      "title": "Flux utilisateur vers une commande shell",
+      "file": "bank_api/support/diagnostics.py",
+      "rule_ids": ["TAINT_COMMAND_INJECTION_SUBPROCESS"]
+    },
+    {
+      "id": "hardcoded-secret",
+      "title": "Secret codé en dur",
+      "file": "bank_api/config.py",
+      "rule_ids": ["HARDCODED_SECRET"]
+    }
+  ]
+}

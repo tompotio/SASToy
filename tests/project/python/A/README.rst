@@ -41,3 +41,20 @@ Lancer une analyse depuis la racine du dépôt
 Les alertes sont des signaux statiques à examiner, pas une preuve d'exploitabilité.
 La règle de détection dépend de la stratégie sélectionnée ; certaines
 propriétés, comme la faiblesse de MD5, sont détectées par l'analyse de flux.
+
+Benchmark automatisé
+--------------------
+
+Le fichier ``expected.json`` décrit les vulnérabilités de ce projet et les
+identifiants de règle susceptibles de les signaler, sans associer de stratégie
+particulière à une vulnérabilité. Depuis la racine du dépôt, affichez celles
+qui sont repérées et celles qui ne le sont pas :
+
+.. code-block:: powershell
+
+   python benchmark.py --projects A
+
+Les vulnérabilités non repérées sont informatives et ne font pas échouer le
+benchmark. Une erreur d'analyse ou un manifeste manquant/invalide produit un
+code de sortie non nul. Le benchmark utilise par défaut les trois stratégies
+implémentées ; ``symbolic_execution`` peut être sélectionnée explicitement.

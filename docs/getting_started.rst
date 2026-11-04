@@ -68,6 +68,57 @@ défaut) et le mode exhaustif. En mode exhaustif, un rapport HTML autonome est
 créé sous ``reports/`` dans le répertoire courant. Le chemin du rapport est
 affiché dans le terminal ; il n'est pas ouvert automatiquement.
 
+Benchmark des mini-projets
+--------------------------
+
+Les mini-projets de ``tests/project/python/`` peuvent décrire leurs constats
+attendus dans un fichier ``expected.json`` à leur racine. Le script
+``benchmark.py`` analyse tous les projets présents et agrège les alertes sans
+retenir quelle stratégie les a produites. Le manifeste décrit les scénarios
+de vulnérabilité ; chaque entrée de ``vulnerabilities`` possède un identifiant,
+un titre, un fichier et les identifiants de règle qui peuvent permettre de
+l'associer à une alerte :
+
+.. code-block:: json
+
+   {
+     "version": 2,
+     "vulnerabilities": [
+       {
+         "id": "dynamic-evaluation",
+         "title": "Évaluation de code non fiable",
+         "file": "src/example.py",
+         "rule_ids": ["UNSAFE_EVAL"]
+       }
+     ]
+   }
+
+Une liste ``rule_ids`` vide permet de documenter une faille qui n'est pas
+encore reconnue par les analyseurs. Une vulnérabilité est considérée repérée
+si une alerte de l'un des analyseurs exécutés correspond à l'un de ses
+identifiants de règle dans le fichier indiqué. Si plusieurs stratégies
+produisent le même signal, il n'est compté qu'une fois.
+
+.. code-block:: powershell
+
+   python benchmark.py
+
+Pour ne lancer que certains projets ou stratégies :
+
+.. code-block:: powershell
+
+   python benchmark.py --projects A B
+   python benchmark.py --strategies ast_pattern_scan taint_analysis secret_scan
+
+Le rapport affiche les vulnérabilités repérées et non repérées ainsi que les
+signaux qui ne correspondent à aucun scénario déclaré. Les vulnérabilités non
+repérées ne font pas échouer le benchmark : il sert à observer la couverture,
+pas à imposer une correspondance exacte ni à maximiser un score. Le code de
+sortie est non nul en cas d'erreur d'analyse ou de manifeste invalide. Par
+défaut, le benchmark sélectionne les trois stratégies implémentées ;
+``symbolic_execution`` n'est pas incluse car elle est actuellement
+indisponible.
+
 Vérifier l'intégrité d'un fichier
 ---------------------------------
 

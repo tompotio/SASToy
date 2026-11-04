@@ -1,0 +1,68 @@
+{
+  "version": 2,
+  "vulnerabilities": [
+    {
+      "id": "alias-authorization-confusion",
+      "title": "Autorisation vérifiée avant résolution d'alias",
+      "file": "share_portal/documents.py",
+      "rule_ids": []
+    },
+    {
+      "id": "preview-host-suffix-validation",
+      "title": "Validation d'hôte par suffixe",
+      "file": "share_portal/previews.py",
+      "rule_ids": []
+    },
+    {
+      "id": "cross-organization-role-change",
+      "title": "Changement de rôle sans portée organisationnelle",
+      "file": "share_portal/roles.py",
+      "rule_ids": []
+    },
+    {
+      "id": "stale-publication-authorization",
+      "title": "Autorisation périmée entre contrôle et publication",
+      "file": "share_portal/publication.py",
+      "rule_ids": []
+    },
+    {
+      "id": "weak-message-signature",
+      "title": "Signature fondée sur MD5 et une concaténation secrète",
+      "file": "share_portal/signatures.py",
+      "rule_ids": ["TAINT_WEAK_CRYPTOGRAPHY"]
+    },
+    {
+      "id": "unsafe-shared-state-deserialization",
+      "title": "Désérialisation non sûre d'états et de métadonnées partagés",
+      "file": "share_portal/imports.py",
+      "rule_ids": [
+        "PICKLE_UNSAFE_LOAD",
+        "UNSAFE_YAML_LOAD",
+        "TAINT_INSECURE_DESERIALIZATION"
+      ]
+    },
+    {
+      "id": "shared-file-command-injection",
+      "title": "Injection de commandes lors de la conversion de fichiers",
+      "file": "share_portal/conversions.py",
+      "rule_ids": [
+        "OS_COMMAND_EXECUTION",
+        "SUBPROCESS_SHELL_TRUE",
+        "TAINT_COMMAND_INJECTION_OS",
+        "TAINT_COMMAND_INJECTION_SUBPROCESS"
+      ]
+    },
+    {
+      "id": "unsafe-shared-archive-extraction",
+      "title": "Extraction d'archive sans filtrage des chemins",
+      "file": "share_portal/archives.py",
+      "rule_ids": ["TARFILE_EXTRACTALL"]
+    },
+    {
+      "id": "shared-document-path-traversal",
+      "title": "Lecture d'un document hors du stockage partagé",
+      "file": "share_portal/files.py",
+      "rule_ids": ["TAINT_PATH_TRAVERSAL_OPEN"]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# SASToy - Outil SAST jouet
+# SASToy
 
 Petit projet de Static Application Security Testing (SAST) conçu pour apprendre les concepts de sécurité logicielle.
 
