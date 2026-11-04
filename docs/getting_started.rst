@@ -29,16 +29,18 @@ synthèse, ni génération de rapport HTML. Exemple :
 
 .. code-block:: text
 
-   ast_pattern_scan, cfg_analysis, secret_scan, symbolic_execution
+   ast_pattern_scan, taint_analysis, secret_scan, symbolic_execution
 
 Les quatre stratégies proposées sont ``ast_pattern_scan`` (repérage de motifs
-syntaxiques), ``cfg_analysis`` (moteur prévu pour CFI et analyse de flot/taint
-et SQLi), ``secret_scan`` (HCS) et ``symbolic_execution``. ``ast_pattern_scan``
-et ``secret_scan`` sont implémentées. ``cfg_analysis`` et
-``symbolic_execution`` retournent un statut « indisponible » et un diagnostic ;
-leurs constats restent vides tant que leurs analyses ne sont pas implémentées.
-Les signaux AST ne prouvent pas à eux seuls une vulnérabilité, et la détection
-HCS n'expose pas la valeur détectée.
+syntaxiques), ``taint_analysis`` (suivi AST expérimental de données non fiables
+vers des appels sensibles), ``secret_scan`` (HCS) et
+``symbolic_execution``. ``ast_pattern_scan``, ``taint_analysis`` et
+``secret_scan`` sont implémentées. ``symbolic_execution`` retourne un statut
+« indisponible » et un diagnostic. ``taint_analysis`` ne construit pas un
+graphe de flot de contrôle ni ne vérifie de politique CFI ; elle constitue un
+premier suivi AST de données potentiellement non fiables. Les signaux AST ne
+prouvent pas à eux seuls une vulnérabilité, et la détection HCS n'expose pas la
+valeur détectée.
 
 Mode exhaustif
 --------------
@@ -59,7 +61,7 @@ Pour sélectionner les stratégies sans invite :
 
 .. code-block:: powershell
 
-   python src/main.py py chemin\vers\projet --mode exhaustif --strategies ast_pattern_scan cfg_analysis secret_scan symbolic_execution
+   python src/main.py py chemin\vers\projet --mode exhaustif --strategies ast_pattern_scan taint_analysis secret_scan symbolic_execution
 
 Sans ``--mode``, SASToy demande de choisir entre le mode manuel (valeur par
 défaut) et le mode exhaustif. En mode exhaustif, un rapport HTML autonome est

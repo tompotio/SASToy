@@ -30,7 +30,7 @@ def build_parser():
         "type",
         choices=["py", "file"],
         help=(
-            "py (stratégies Python, non implémentées), "
+            "py (stratégies d'analyse Python), "
             "file (vérification d'intégrité d'un fichier)"
         ),
     )

@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
 
+from rich.console import Console
+
+from src.results import StrategyResult
+
 
 class VulnerabilityAnalyzer(ABC):
     """Common contract for vulnerability analysis of a source language."""
 
     @abstractmethod
-    def get_files(self, target_path, recursive=False):
+    def get_files(self, target_path: str, recursive: bool = False) -> list[str]:
         """Return source files supported by this analyzer.
 
         Args:
@@ -14,7 +18,16 @@ class VulnerabilityAnalyzer(ABC):
         """
 
     @abstractmethod
-    def analyze_operation(self, operation, files, console):
+    def analyze_strategy(self, strategy: str, files: list[str]) -> StrategyResult:
+        """Run one supported strategy and return its normalized result."""
+
+    @abstractmethod
+    def analyze_operation(
+        self,
+        operation: str,
+        files: list[str],
+        console: Console,
+    ) -> StrategyResult | None:
         """Run one supported analysis operation on source files.
 
         Args:

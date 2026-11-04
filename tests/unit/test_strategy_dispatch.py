@@ -25,15 +25,15 @@ def test_implemented_and_unimplemented_strategies_return_contracts():
 
     ast_result = analyzer.analyze_strategy("ast_pattern_scan", files)
     secret_result = analyzer.analyze_strategy("secret_scan", files)
-    cfg_result = analyzer.analyze_strategy("cfg_analysis", files)
+    taint_result = analyzer.analyze_strategy("taint_analysis", files)
     symbolic_result = analyzer.analyze_strategy("symbolic_execution", files)
 
     assert ast_result.status == "completed"
     assert any(finding.rule_id == "UNSAFE_EVAL" for finding in ast_result.findings)
     assert secret_result.status == "completed"
-    assert cfg_result.status == "unavailable"
+    assert taint_result.status == "completed"
+    assert any(finding.kind == "taint_flow" for finding in taint_result.findings)
     assert symbolic_result.status == "unavailable"
-    assert cfg_result.diagnostics[0].code == "strategy_not_implemented"
     assert symbolic_result.diagnostics[0].code == "strategy_not_implemented"
 
 
@@ -49,7 +49,7 @@ def test_manual_cli_displays_selected_strategy_results_without_aggregation(
             "--mode",
             "manuel",
         ],
-        input="ast_pattern_scan,cfg_analysis\n",
+        input="ast_pattern_scan,taint_analysis\n",
         capture_output=True,
         cwd=tmp_path,
         text=True,
@@ -61,7 +61,7 @@ def test_manual_cli_displays_selected_strategy_results_without_aggregation(
     assert result.returncode == 0, result.stderr
     assert "UNSAFE_EVAL" in output
     assert "Repérage de motifs syntaxiques — completed" in output
-    assert "Analyse CFG (CFI, flot/taint et SQLi) — unavailable" in output
+    assert "Analyse de flux taint — completed" in output
     assert "Agrégation" not in output
     assert not list(tmp_path.glob("reports/*.html"))
 

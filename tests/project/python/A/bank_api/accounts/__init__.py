@@ -1,0 +1,1 @@
+"""Gestion simplifiée des comptes."""

@@ -29,9 +29,9 @@ def test_aggregate_preserves_strategy_and_finding_order_without_deduplication():
         findings=[_finding("ast_pattern_scan")],
     )
     second = StrategyResult(
-        strategy="cfg_analysis",
+        strategy="taint_analysis",
         status="unavailable",
-        findings=[_finding("cfg_analysis")],
+        findings=[_finding("taint_analysis")],
     )
 
     aggregate = aggregate_results([first, second])
@@ -41,7 +41,7 @@ def test_aggregate_preserves_strategy_and_finding_order_without_deduplication():
     assert aggregate.findings == [first.findings[0], second.findings[0]]
     assert [finding.origin.strategy for finding in aggregate.findings] == [
         "ast_pattern_scan",
-        "cfg_analysis",
+        "taint_analysis",
     ]
 
 

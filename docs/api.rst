@@ -11,7 +11,23 @@ Analyseurs
    :members:
    :show-inheritance:
 
-.. automodule:: src.analyzers.python
+.. automodule:: src.analyzers.python.analyzer
+   :members:
+   :show-inheritance:
+
+.. automodule:: src.analyzers.python.taint_analysis
+   :members:
+   :show-inheritance:
+
+.. automodule:: src.analyzers.python.ast_pattern_scan
+   :members:
+   :show-inheritance:
+
+.. automodule:: src.analyzers.python.secret_scan
+   :members:
+   :show-inheritance:
+
+.. automodule:: src.analyzers.python.symbolic_execution
    :members:
    :show-inheritance:
 

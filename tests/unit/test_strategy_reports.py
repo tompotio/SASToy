@@ -27,7 +27,7 @@ def test_generated_report_displays_aggregated_strategy_results(tmp_path):
             status="completed",
         ),
         StrategyResult(
-            strategy="cfg_analysis",
+            strategy="taint_analysis",
             status="unavailable",
         ),
     ]
@@ -43,7 +43,7 @@ def test_generated_report_displays_aggregated_strategy_results(tmp_path):
     assert "AGRÉGAT BRUT · SANS SYNTHÈSE NI SCORING" in report
     assert "completed" in report
     assert "unavailable" in report
-    assert "Analyse CFG (CFI, flot/taint et SQLi)" in report
+    assert "Analyse de flux taint" in report
     assert "Exécution symbolique" not in report
     assert "&lt;cible&gt;" in report
     assert "https://" not in report
@@ -61,7 +61,7 @@ def test_exhaustive_cli_runs_strategies_aggregates_and_creates_report(tmp_path):
             "exhaustif",
             "--strategies",
             "ast_pattern_scan",
-            "cfg_analysis",
+            "taint_analysis",
             "secret_scan",
             "symbolic_execution",
         ],
@@ -76,12 +76,13 @@ def test_exhaustive_cli_runs_strategies_aggregates_and_creates_report(tmp_path):
     assert result.returncode == 0, result.stderr
     assert len(reports) == 1
     assert "Rapport exhaustif généré" in result.stdout
-    assert "4 stratégie(s), 1 constat(s), statut partial" in result.stdout
+    assert "4 stratégie(s), 2 constat(s), statut partial" in result.stdout
     report = reports[0].read_text(encoding="utf-8")
     assert "Résultats des stratégies" in report
     assert "AGRÉGAT BRUT · SANS SYNTHÈSE NI SCORING" in report
     assert "Repérage de motifs syntaxiques" in report
     assert "UNSAFE_EVAL" in report
+    assert "TAINT_UNSAFE_EVAL" in report
     assert "completed" in report
     assert "unavailable" in report
     assert "Exécution symbolique" in report

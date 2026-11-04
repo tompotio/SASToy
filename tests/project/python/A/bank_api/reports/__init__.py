@@ -1,0 +1,1 @@
+"""Génération simplifiée de rapports."""
