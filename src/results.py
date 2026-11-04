@@ -10,6 +10,7 @@ StrategyStatus: TypeAlias = Literal[
     "failed",
     "unavailable",
 ]
+
 AggregateStatus: TypeAlias = Literal["completed", "partial", "failed"]
 Severity: TypeAlias = Literal[
     "critical",
@@ -19,13 +20,15 @@ Severity: TypeAlias = Literal[
     "info",
     "unknown",
 ]
+
 FindingKind: TypeAlias = Literal[
-    "signal",
-    "secret",
+    "signal", 
+    "secret", 
     "taint_flow",
-    "policy_violation",
+    "policy_violation", # A quoi cela correspond ?
     "symbolic_path",
 ]
+
 SymbolicFeasibility: TypeAlias = Literal["feasible", "infeasible", "unknown"]
 
 
